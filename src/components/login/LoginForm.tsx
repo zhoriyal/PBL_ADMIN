@@ -1,11 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const submittedEmail = String(formData.get("email") ?? "").trim();
+    const submittedPassword = String(formData.get("password") ?? "");
+
+    if (!submittedEmail || !submittedPassword) {
+      setLoginError("Email dan password wajib diisi.");
+      return;
+    }
+
+    if (formData.get("remember-me") === "on") {
+      window.localStorage.setItem("museum-admin-email", submittedEmail);
+    } else {
+      window.localStorage.removeItem("museum-admin-email");
+    }
+
+    router.push("/dashboard");
+  };
 
   return (
     <div className="login-container">
@@ -47,17 +72,24 @@ export default function LoginForm() {
         <p className="login-subtitle">Masukkan Email dan Password untuk mengakses</p>
 
         {/* Form */}
-        <form className="login-form" onSubmit={(e) => e.preventDefault()}>
+        <form className="login-form" onSubmit={handleSubmit}>
           {/* Email Field */}
           <div className="form-group">
             <label htmlFor="email" className="form-label">Email</label>
             <div className="form-input-wrapper">
               <input
                 id="email"
+                name="email"
                 type="email"
                 className="form-input"
                 placeholder="Masukkan Email Anda..."
                 autoComplete="email"
+                required
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setLoginError("");
+                }}
               />
             </div>
           </div>
@@ -68,11 +100,18 @@ export default function LoginForm() {
             <div className="form-input-wrapper">
               <input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 className="form-input"
                 placeholder="Masukkan Password Anda..."
                 style={{ paddingRight: "48px" }}
                 autoComplete="current-password"
+                required
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setLoginError("");
+                }}
               />
               <button
                 type="button"
@@ -100,6 +139,7 @@ export default function LoginForm() {
             <label className="remember-me" htmlFor="remember-me">
               <input
                 id="remember-me"
+                name="remember-me"
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
@@ -108,6 +148,8 @@ export default function LoginForm() {
             </label>
             <a href="#" className="forgot-password">Lupa Password?</a>
           </div>
+
+          {loginError && <p role="alert" className="text-sm text-red-600">{loginError}</p>}
 
           {/* Submit Button */}
           <button id="btn-login" type="submit" className="btn-masuk">
