@@ -1,26 +1,526 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #F5F0E8;
+  --cream-dark: #EDE8DC;
+  --dark-green: #2C4A2C;
+  --dark-green-hover: #1E3A1E;
+  --olive-green: #3D5C3D;
+  --gold: #C9A84C;
+  --text-dark: #1A1A1A;
+  --text-gray: #6B6B6B;
+  --border-light: #D8D0C0;
+  --input-bg: #F8F4EC;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--cream);
+  color: var(--text-dark);
+  font-family: 'EB Garamond', Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Login Page Styles */
+.login-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* LEFT PANEL - Image */
+.login-left {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.login-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.login-left-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.2) 40%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+}
+
+.login-left-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32px 36px;
+}
+
+.login-left-caption .label {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 4px;
+}
+
+.login-left-caption .museum-name {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* RIGHT PANEL - Form */
+.login-right {
+  width: 480px;
+  min-width: 420px;
+  background-color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 56px;
+  position: relative;
+}
+
+.version-tag {
+  position: absolute;
+  top: 28px;
+  right: 36px;
+  font-size: 11px;
+  color: var(--text-gray);
+  letter-spacing: 0.05em;
+}
+
+/* Logo */
+.museum-logo {
+  width: 80px;
+  height: 80px;
+  background-color: var(--dark-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(44, 74, 44, 0.3);
+}
+
+.museum-logo svg {
+  width: 42px;
+  height: 42px;
+  fill: var(--gold);
+}
+
+/* Headings */
+.login-title {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dark);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.login-subtitle {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px;
+  color: var(--text-gray);
+  text-align: center;
+  margin-bottom: 40px;
+  letter-spacing: 0.02em;
+}
+
+/* Form */
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-label {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: capitalize;
+  color: var(--text-dark);
+}
+
+.form-input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 13px 16px;
+  background-color: #EEEAE0;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: #ABA89F;
+  font-style: italic;
+}
+
+.form-input:focus {
+  border-color: var(--dark-green);
+  background-color: #F0EDE5;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-gray);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: var(--dark-green);
+}
+
+/* Remember Me & Forgot Password */
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -4px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.remember-me input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 3px;
+  cursor: pointer;
+  accent-color: var(--dark-green);
+}
+
+.remember-me span {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+.forgot-password {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+
+.forgot-password:hover {
+  color: var(--dark-green);
+  text-decoration: underline;
+}
+
+/* Button */
+.btn-masuk {
+  width: 100%;
+  padding: 15px;
+  background-color: var(--dark-green);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.1s ease, box-shadow 0.25s ease;
+  margin-top: 4px;
+  box-shadow: 0 2px 12px rgba(44, 74, 44, 0.2);
+}
+
+.btn-masuk:hover {
+  background-color: var(--dark-green-hover);
+  box-shadow: 0 4px 20px rgba(44, 74, 44, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-masuk:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(44, 74, 44, 0.2);
+}
+
+/* Security Notice */
+.security-notice {
+  margin-top: 28px;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.security-notice p {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 12px;
+  color: #8A8680;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .login-left {
+    display: none;
+  }
+
+  .login-right {
+    width: 100%;
+    min-width: unset;
+    padding: 48px 32px;
+  }
+}
+
+/* =====================================================
+   ADMIN LAYOUT (Shared: Dashboard, Tiket, Koleksi, etc.)
+   ===================================================== */
+
+.admin-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #F0ECE4;
+}
+
+.admin-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 36px 40px;
+}
+
+/* =====================================================
+   SIDEBAR
+   ===================================================== */
+
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background-color: var(--dark-green);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
+}
+
+.sidebar-logo-icon {
+  width: 44px;
+  height: 44px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(201, 168, 76, 0.5);
+}
+
+.sidebar-logo-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--gold);
+}
+
+.sidebar-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.sidebar-logo-museum {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-logo-brawijaya {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  gap: 2px;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.sidebar-nav-item.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.sidebar-nav-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.85;
+}
+
+.sidebar-nav-item.active .sidebar-nav-icon {
+  opacity: 1;
+  color: var(--gold);
+}
+
+.sidebar-nav-label {
+  white-space: nowrap;
+}
+
+.sidebar-footer {
+  padding: 16px 12px 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-logout:hover {
+  background-color: rgba(255, 100, 100, 0.1);
+  color: #ff8a8a;
+}
+
+/* =====================================================
+   ADMIN PAGE CONTENT
+   ===================================================== */
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.admin-page-header {
+  border-bottom: 1.5px solid var(--border-light);
+  padding-bottom: 20px;
+}
+
+.admin-page-title {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.admin-page-subtitle {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px;
+  color: var(--text-gray);
+}
+
+.admin-page-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 40px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1.5px dashed var(--border-light);
+  color: var(--text-gray);
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 15px;
+}
+
+.placeholder-icon {
+  font-size: 48px;
 }
