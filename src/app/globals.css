@@ -474,9 +474,7 @@ body {
   color: #ff8a8a;
 }
 
-/* =====================================================
-   ADMIN PAGE CONTENT
-   ===================================================== */
+/* ADMIN PAGE */
 
 .admin-page {
   display: flex;
@@ -521,4 +519,1194 @@ body {
 
 .placeholder-icon {
   font-size: 48px;
+}
+
+
+
+/* 01. DESIGN TOKENS */
+
+:root {
+  --museum-green: #2C4A2C;
+  --museum-green-dark: #1E351F;
+  --museum-green-soft: #EEF2EC;
+
+  --museum-cream: #F5F0E8;
+  --museum-cream-soft: #FAF8F3;
+
+  --museum-gold: #C9A84C;
+  --museum-gold-soft: #F5EED8;
+
+  --museum-text: #1A1A1A;
+  --museum-text-soft: #5F625E;
+  --museum-muted: #858781;
+
+  --museum-border: #E5E0D6;
+  --museum-border-soft: #EEEAE1;
+
+  --museum-shadow-sm:
+    0 2px 8px rgba(31, 42, 35, 0.04);
+
+  --museum-shadow:
+    0 8px 28px rgba(31, 42, 35, 0.07);
+
+  --museum-shadow-lg:
+    0 18px 50px rgba(31, 42, 35, 0.10);
+
+  --museum-radius: 12px;
+  --museum-radius-lg: 16px;
+
+  --museum-ease:
+    cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* ============================================================
+   02. GLOBAL REFINEMENT
+   ============================================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    linear-gradient(
+      180deg,
+      #F5F0E8 0%,
+      #F2EEE6 100%
+    );
+
+  color: var(--museum-text);
+}
+
+
+/* ============================================================
+   03. ADMIN BACKGROUND
+   ============================================================ */
+
+.admin-layout {
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(201, 168, 76, 0.035),
+      transparent 32%
+    ),
+    linear-gradient(
+      180deg,
+      #F4F0E8 0%,
+      #EFEAE1 100%
+    );
+}
+
+
+/* ============================================================
+   04. MAIN CONTENT
+   ============================================================ */
+
+.admin-main {
+  scroll-behavior: smooth;
+}
+
+.admin-main::-webkit-scrollbar {
+  width: 7px;
+}
+
+.admin-main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-main::-webkit-scrollbar-thumb {
+  background: rgba(44, 74, 44, 0.16);
+  border-radius: 999px;
+}
+
+.admin-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(44, 74, 44, 0.28);
+}
+
+
+/* ============================================================
+   05. SIDEBAR PREMIUM
+   ============================================================ */
+
+.sidebar {
+  position: relative;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2C4A2C 0%,
+      #263F27 55%,
+      #223922 100%
+    );
+
+  box-shadow:
+    5px 0 28px rgba(17, 31, 20, 0.13);
+
+  z-index: 20;
+
+  transition:
+    box-shadow 350ms ease;
+}
+
+
+/* subtle decorative line */
+
+.sidebar::after {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  right: 0;
+
+  width: 1px;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(201, 168, 76, 0.35),
+      rgba(255, 255, 255, 0.04) 40%,
+      rgba(201, 168, 76, 0.18)
+    );
+
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   06. SIDEBAR LOGO
+   ============================================================ */
+
+.sidebar-logo {
+  padding-top: 2px;
+
+  transition:
+    transform 300ms var(--museum-ease);
+}
+
+.sidebar-logo:hover {
+  transform: translateX(2px);
+}
+
+.sidebar-logo-icon {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.14),
+      rgba(255,255,255,0.06)
+    );
+
+  box-shadow:
+    0 5px 15px rgba(0,0,0,0.08);
+
+  transition:
+    transform 350ms var(--museum-ease),
+    border-color 250ms ease,
+    box-shadow 350ms ease;
+}
+
+.sidebar-logo:hover .sidebar-logo-icon {
+  transform: rotate(-2deg) scale(1.04);
+
+  border-color:
+    rgba(201, 168, 76, 0.8);
+
+  box-shadow:
+    0 7px 20px rgba(0,0,0,0.14);
+}
+
+
+/* ============================================================
+   07. SIDEBAR MENU
+   ============================================================ */
+
+.sidebar-nav {
+  gap: 4px;
+}
+
+
+/* menu item */
+
+.sidebar-nav-item {
+  position: relative;
+
+  border: 1px solid transparent;
+
+  transition:
+    background-color 250ms ease,
+    color 250ms ease,
+    transform 250ms var(--museum-ease),
+    border-color 250ms ease,
+    padding-left 250ms var(--museum-ease);
+}
+
+
+/* active indicator */
+
+.sidebar-nav-item::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 50%;
+
+  width: 3px;
+  height: 0;
+
+  border-radius:
+    0 4px 4px 0;
+
+  background: var(--museum-gold);
+
+  transform:
+    translateY(-50%);
+
+  transition:
+    height 250ms var(--museum-ease);
+}
+
+
+/* hover */
+
+.sidebar-nav-item:hover {
+  background:
+    rgba(255,255,255,0.075);
+
+  border-color:
+    rgba(255,255,255,0.045);
+
+  transform:
+    translateX(3px);
+
+  padding-left: 17px;
+}
+
+
+/* active */
+
+.sidebar-nav-item.active {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0.15),
+      rgba(255,255,255,0.08)
+    );
+
+  border-color:
+    rgba(255,255,255,0.06);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+.sidebar-nav-item.active::before {
+  height: 48%;
+}
+
+
+/* icon */
+
+.sidebar-nav-icon {
+  transition:
+    transform 250ms var(--museum-ease),
+    color 250ms ease;
+}
+
+.sidebar-nav-item:hover .sidebar-nav-icon {
+  transform: scale(1.06);
+}
+
+.sidebar-nav-item.active .sidebar-nav-icon {
+  filter:
+    drop-shadow(
+      0 2px 4px rgba(201,168,76,0.15)
+    );
+}
+
+
+/* ============================================================
+   08. SIDEBAR FOOTER
+   ============================================================ */
+
+.sidebar-footer {
+  border-top-color:
+    rgba(255,255,255,0.08);
+}
+
+.sidebar-logout {
+  transition:
+    background-color 250ms ease,
+    color 250ms ease,
+    transform 250ms var(--museum-ease);
+}
+
+.sidebar-logout:hover {
+  transform:
+    translateX(3px);
+
+  background:
+    rgba(255,255,255,0.055);
+}
+
+
+/* ============================================================
+   09. PAGE HEADER
+   ============================================================ */
+
+.admin-page-header {
+  position: relative;
+
+  padding-bottom: 22px;
+
+  border-bottom:
+    1px solid var(--museum-border);
+}
+
+
+/* elegant accent line */
+
+.admin-page-header::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  bottom: -1px;
+
+  width: 46px;
+  height: 2px;
+
+  background:
+    var(--museum-gold);
+
+  border-radius:
+    999px;
+}
+
+
+/* title */
+
+.admin-page-title {
+  color:
+    var(--museum-text);
+
+  letter-spacing:
+    0.025em;
+}
+
+
+/* subtitle */
+
+.admin-page-subtitle {
+  color:
+    var(--museum-text-soft);
+
+  line-height:
+    1.65;
+}
+
+
+/* ============================================================
+   10. TAILWIND CARD REFINEMENT
+   ============================================================ */
+
+/*
+   Hanya mempengaruhi card putih yang memang sudah ada.
+*/
+
+main .bg-white.rounded-xl {
+  border-color:
+    var(--museum-border-soft);
+
+  box-shadow:
+    var(--museum-shadow-sm);
+
+  transition:
+    transform 320ms var(--museum-ease),
+    box-shadow 320ms ease,
+    border-color 250ms ease;
+}
+
+
+/*
+   Hover card
+*/
+
+main .bg-white.rounded-xl:hover {
+  border-color:
+    #DDD7CA;
+
+  box-shadow:
+    var(--museum-shadow);
+
+  transform:
+    translateY(-2px);
+}
+
+
+/*
+   Jangan menaikkan card ketika berada di modal.
+*/
+
+.fixed .bg-white.rounded-xl:hover {
+  transform: none;
+}
+
+
+/* ============================================================
+   11. STATISTIC CARDS
+   ============================================================ */
+
+main .bg-white.rounded-xl.shadow-sm {
+  box-shadow:
+    0 2px 10px rgba(31,42,35,0.045);
+}
+
+main .bg-white.rounded-xl.shadow-sm:hover {
+  box-shadow:
+    0 12px 30px rgba(31,42,35,0.075);
+}
+
+
+/* ============================================================
+   12. ICON BOX
+   ============================================================ */
+
+main .rounded-lg {
+  transition:
+    transform 250ms var(--museum-ease),
+    box-shadow 250ms ease;
+}
+
+main .bg-white.rounded-xl:hover .rounded-lg {
+  transform:
+    scale(1.035);
+}
+
+
+/* ============================================================
+   13. SEARCH INPUT
+   ============================================================ */
+
+main input[type="text"],
+main input[type="search"],
+main select,
+main textarea {
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms var(--museum-ease);
+}
+
+
+/* focus */
+
+main input[type="text"]:focus,
+main input[type="search"]:focus,
+main select:focus,
+main textarea:focus {
+  border-color:
+    rgba(44,74,44,0.45);
+
+  background-color:
+    #FFFFFF;
+
+  box-shadow:
+    0 0 0 3px rgba(44,74,44,0.055);
+
+  transform:
+    translateY(-1px);
+}
+
+
+/* ============================================================
+   14. BUTTON SYSTEM
+   ============================================================ */
+
+main button {
+  transition:
+    transform 180ms var(--museum-ease),
+    box-shadow 220ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+main button:hover {
+  transform:
+    translateY(-1px);
+}
+
+main button:active {
+  transform:
+    scale(0.975);
+}
+
+
+/*
+   Primary dark green buttons
+*/
+
+main button.bg-\[\#1C2D24\],
+main button.bg-\[\#2D3E33\] {
+  box-shadow:
+    0 4px 12px rgba(28,45,36,0.10);
+}
+
+main button.bg-\[\#1C2D24\]:hover,
+main button.bg-\[\#2D3E33\]:hover {
+  box-shadow:
+    0 8px 20px rgba(28,45,36,0.17);
+}
+
+
+/* ============================================================
+   15. TABLE
+   ============================================================ */
+
+main table {
+  border-spacing: 0;
+}
+
+
+/* table header */
+
+main thead tr {
+  background:
+    #F8F6F1;
+}
+
+
+/* table cells */
+
+main tbody tr {
+  transition:
+    background-color 200ms ease,
+    transform 200ms var(--museum-ease);
+}
+
+
+/* hover row */
+
+main tbody tr:hover {
+  background:
+    #FAF9F5;
+}
+
+
+/* row divider */
+
+main tbody tr td {
+  border-bottom-color:
+    #EEEAE2;
+}
+
+
+/* ============================================================
+   16. TABLE ACTION BUTTON
+   ============================================================ */
+
+main tbody button {
+  transition:
+    transform 180ms var(--museum-ease),
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+main tbody button:hover {
+  transform:
+    translateY(-1px) scale(1.02);
+}
+
+
+/* ============================================================
+   17. STATUS BADGES
+   ============================================================ */
+
+main span.rounded-full {
+  transition:
+    transform 180ms var(--museum-ease),
+    box-shadow 180ms ease;
+}
+
+main span.rounded-full:hover {
+  transform:
+    scale(1.025);
+}
+
+
+/* ============================================================
+   18. PAGINATION
+   ============================================================ */
+
+main nav button,
+main button[aria-label*="page"],
+main button[aria-label*="halaman"] {
+  transition:
+    transform 180ms var(--museum-ease),
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+main nav button:hover {
+  transform:
+    translateY(-1px);
+}
+
+
+/* ============================================================
+   19. EMPTY STATE
+   ============================================================ */
+
+.admin-page-placeholder {
+  position: relative;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.72),
+      rgba(250,248,243,0.72)
+    );
+
+  border-color:
+    var(--museum-border);
+
+  box-shadow:
+    var(--museum-shadow-sm);
+
+  transition:
+    transform 300ms var(--museum-ease),
+    box-shadow 300ms ease;
+}
+
+.admin-page-placeholder:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    var(--museum-shadow);
+}
+
+.placeholder-icon {
+  opacity:
+    0.75;
+
+  filter:
+    grayscale(15%);
+}
+
+
+/* ============================================================
+   20. MODAL
+   ============================================================ */
+
+
+/*
+   Overlay
+*/
+
+.fixed.inset-0.z-50 {
+  backdrop-filter:
+    blur(3px);
+
+  -webkit-backdrop-filter:
+    blur(3px);
+}
+
+
+/*
+   Modal panel
+*/
+
+.fixed.inset-0.z-50 > div {
+  box-shadow:
+    0 25px 70px rgba(15,25,18,0.18);
+
+  border-color:
+    rgba(44,74,44,0.10);
+}
+
+
+/*
+   modal input
+*/
+
+.fixed.inset-0.z-50 input,
+.fixed.inset-0.z-50 textarea,
+.fixed.inset-0.z-50 select {
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.fixed.inset-0.z-50 input:focus,
+.fixed.inset-0.z-50 textarea:focus,
+.fixed.inset-0.z-50 select:focus {
+  border-color:
+    rgba(44,74,44,0.45);
+
+  box-shadow:
+    0 0 0 3px rgba(44,74,44,0.06);
+}
+
+
+/* ============================================================
+   21. MODAL BUTTONS
+   ============================================================ */
+
+.fixed.inset-0.z-50 button {
+  transition:
+    transform 180ms var(--museum-ease),
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.fixed.inset-0.z-50 button:hover {
+  transform:
+    translateY(-1px);
+}
+
+.fixed.inset-0.z-50 button:active {
+  transform:
+    scale(0.975);
+}
+
+
+/* ============================================================
+   22. LOGIN PAGE PREMIUM
+   ============================================================ */
+
+.login-container {
+  background:
+    var(--museum-cream);
+}
+
+
+/*
+   image
+*/
+
+.login-left img {
+  transition:
+    transform 1.2s var(--museum-ease),
+    filter 700ms ease;
+}
+
+.login-left:hover img {
+  transform:
+    scale(1.015);
+}
+
+
+/*
+   image overlay
+*/
+
+.login-left-overlay {
+  background:
+    linear-gradient(
+      to top,
+      rgba(0,0,0,0.72) 0%,
+      rgba(0,0,0,0.25) 42%,
+      rgba(0,0,0,0.04) 100%
+    );
+}
+
+
+/*
+   login panel
+*/
+
+.login-right {
+  box-shadow:
+    -10px 0 40px rgba(31,42,35,0.05);
+}
+
+
+/*
+   logo
+*/
+
+.museum-logo {
+  transition:
+    transform 350ms var(--museum-ease),
+    box-shadow 350ms ease;
+}
+
+.museum-logo:hover {
+  transform:
+    translateY(-2px) scale(1.025);
+
+  box-shadow:
+    0 10px 28px rgba(44,74,44,0.25);
+}
+
+
+/*
+   login title
+*/
+
+.login-title {
+  letter-spacing:
+    0.14em;
+}
+
+
+/*
+   login form
+*/
+
+.login-form {
+  max-width:
+    380px;
+}
+
+
+/*
+   input
+*/
+
+.form-input {
+  border-color:
+    rgba(216,208,192,0.7);
+
+  background:
+    #F1EDE4;
+
+  transition:
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms var(--museum-ease);
+}
+
+.form-input:hover {
+  background:
+    #F4F1EA;
+}
+
+.form-input:focus {
+  background:
+    #FFFFFF;
+
+  border-color:
+    var(--museum-green);
+
+  box-shadow:
+    0 0 0 3px rgba(44,74,44,0.055);
+
+  transform:
+    translateY(-1px);
+}
+
+
+/*
+   login button
+*/
+
+.btn-masuk {
+  position: relative;
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2C4A2C,
+      #233D24
+    );
+}
+
+.btn-masuk:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 9px 24px rgba(44,74,44,0.25);
+}
+
+
+/* ============================================================
+   23. LOGIN SECURITY
+   ============================================================ */
+
+.security-notice {
+  opacity:
+    0.85;
+}
+
+
+/* ============================================================
+   24. TEXT REFINEMENT
+   ============================================================ */
+
+.admin-page h1,
+.admin-page h2,
+.admin-page h3 {
+  color:
+    var(--museum-text);
+}
+
+
+/* ============================================================
+   25. LINKS
+   ============================================================ */
+
+main a {
+  transition:
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+main a:hover {
+  opacity:
+    0.82;
+}
+
+
+/* ============================================================
+   26. IMAGE / COLLECTION
+   ============================================================ */
+
+main img {
+  transition:
+    transform 450ms var(--museum-ease),
+    filter 450ms ease;
+}
+
+
+/*
+   hanya image yang berada di card
+*/
+
+main .rounded-xl img:hover {
+  transform:
+    scale(1.018);
+}
+
+
+/* ============================================================
+   27. DASHBOARD INLINE STYLE CARD
+   ============================================================ */
+
+
+/*
+   Dashboard menggunakan inline style.
+   Selector ini hanya mengincar div card dengan struktur existing.
+*/
+
+main > div > div[style*="background-color: rgb(255, 255, 255)"] {
+  transition:
+    transform 300ms var(--museum-ease),
+    box-shadow 300ms ease;
+}
+
+
+/*
+   Jangan terlalu kuat karena dashboard memang
+   menggunakan desain compact.
+*/
+
+main > div > div[style*="background-color: rgb(255, 255, 255)"]:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 10px 28px rgba(31,42,35,0.07);
+}
+
+
+/* ============================================================
+   28. DASHBOARD NOTIFICATION
+   ============================================================ */
+
+
+/*
+   tombol notifikasi
+*/
+
+main button[style*="border-radius: 50%"] {
+  transition:
+    transform 180ms var(--museum-ease),
+    box-shadow 220ms ease;
+}
+
+main button[style*="border-radius: 50%"]:hover {
+  transform:
+    translateY(-1px) scale(1.025);
+
+  box-shadow:
+    0 5px 14px rgba(31,42,35,0.08);
+}
+
+
+/* ============================================================
+   29. NOTIFICATION DOT
+   ============================================================ */
+
+main span[style*="background-color: rgb(239, 68, 68)"] {
+  animation:
+    museumNotificationPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes museumNotificationPulse {
+  0%,
+  100% {
+    transform:
+      scale(1);
+  }
+
+  50% {
+    transform:
+      scale(1.35);
+  }
+}
+
+
+/* ============================================================
+   30. DASHBOARD CHART
+   ============================================================ */
+
+main div[style*="height: 160px"] > div {
+  transition:
+    opacity 250ms ease,
+    transform 300ms var(--museum-ease);
+}
+
+main div[style*="height: 160px"] > div:hover {
+  opacity:
+    0.86;
+
+  transform:
+    translateY(-3px);
+}
+
+
+/* ============================================================
+   31. CARD NUMBER
+   ============================================================ */
+
+main .text-lg.font-bold,
+main .text-xl.font-bold,
+main .text-2xl.font-bold {
+  letter-spacing:
+    -0.02em;
+}
+
+
+/* ============================================================
+   32. GOLD ACCENT
+   ============================================================ */
+
+.museum-gold {
+  color:
+    var(--museum-gold);
+}
+
+.museum-gold-bg {
+  background:
+    var(--museum-gold-soft);
+}
+
+
+/* ============================================================
+   33. FOCUS ACCESSIBILITY
+   ============================================================ */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline:
+    2px solid rgba(201,168,76,0.7);
+
+  outline-offset:
+    2px;
+}
+
+
+/* ============================================================
+   34. SELECTION
+   ============================================================ */
+
+::selection {
+  background:
+    rgba(201,168,76,0.24);
+
+  color:
+    var(--museum-text);
+}
+
+
+/* ============================================================
+   35. RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  .sidebar {
+    box-shadow:
+      3px 0 18px rgba(17,31,20,0.10);
+  }
+
+  main .bg-white.rounded-xl:hover {
+    transform:
+      translateY(-1px);
+  }
+
+}
+
+
+@media (max-width: 640px) {
+
+  .admin-page {
+    gap:
+      22px;
+  }
+
+  .admin-page-title {
+    font-size:
+      24px;
+  }
+
+  .admin-page-header {
+    padding-bottom:
+      16px;
+  }
+
+  .login-right {
+    box-shadow:
+      none;
+  }
+
+}
+
+
+/* ============================================================
+   36. REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+
+    scroll-behavior:
+      auto !important;
+  }
+
 }
