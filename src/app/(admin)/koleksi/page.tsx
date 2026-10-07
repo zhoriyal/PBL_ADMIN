@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useMemo, useState } from "react";
 import {
@@ -88,6 +88,7 @@ export default function KatalogKoleksiPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDetail, setSelectedDetail] = useState<KoleksiItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<KoleksiItem | null>(null);
   const [formData, setFormData] = useState({
     nama: "",
     subDeskripsi: "",
@@ -139,6 +140,17 @@ export default function KatalogKoleksiPage() {
       setKoleksiList((items) => items.filter((item) => item.id !== id));
       setCurrentPage(1);
     }
+  };
+
+  const handleEditSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editItem) return;
+    setKoleksiList((items) => items.map((item) => item.id === editItem.id ? editItem : item));
+    setEditItem(null);
+  };
+
+  const openEditModal = (item: KoleksiItem) => {
+    setEditItem({ ...item });
   };
 
   return (
@@ -321,7 +333,7 @@ export default function KatalogKoleksiPage() {
                       <button onClick={() => setSelectedDetail(item)} className="flex items-center gap-0.5 text-blue-600 hover:text-blue-800 font-medium text-[11px]">
                         <Eye className="w-3.5 h-3.5" /> Detail
                       </button>
-                      <button className="flex items-center gap-0.5 text-amber-600 hover:text-amber-800 font-medium text-[11px]">
+                      <button onClick={() => openEditModal(item)} className="flex items-center gap-0.5 text-amber-600 hover:text-amber-800 font-medium text-[11px]">
                         <Edit className="w-3.5 h-3.5" /> Edit
                       </button>
                       <button onClick={() => handleDelete(item.id)} className="flex items-center gap-0.5 text-red-600 hover:text-red-800 font-medium text-[11px]">
@@ -418,6 +430,47 @@ export default function KatalogKoleksiPage() {
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="rounded-lg border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50">Batal</button>
                 <button type="submit" className="rounded-lg bg-[#1C2D24] px-4 py-2 font-semibold text-white hover:bg-[#253d30]">Simpan Koleksi</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onClick={() => setEditItem(null)}>
+          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl" onClick={(event) => event.stopPropagation()}>
+            <button aria-label="Tutup formulir edit" onClick={() => setEditItem(null)} className="absolute right-4 top-4 text-slate-400 hover:text-slate-700">
+              <X className="h-5 w-5" />
+            </button>
+            <h3 className="mb-4 pr-8 text-base font-bold uppercase text-slate-900">Edit Koleksi</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-3 text-xs">
+              <label className="block font-semibold text-slate-700">Nama Koleksi
+                <input required value={editItem.nama} onChange={(event) => setEditItem({ ...editItem, nama: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
+              </label>
+              <label className="block font-semibold text-slate-700">Keterangan Singkat
+                <input value={editItem.subDeskripsi} onChange={(event) => setEditItem({ ...editItem, subDeskripsi: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block font-semibold text-slate-700">Kategori
+                  <select value={editItem.kategori} onChange={(event) => setEditItem({ ...editItem, kategori: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal">
+                    <option>Kendaraan</option><option>Senjata</option><option>Dokumen</option><option>Pakaian</option>
+                  </select>
+                </label>
+                <label className="block font-semibold text-slate-700">Tahun / Era
+                  <input value={editItem.tahun} onChange={(event) => setEditItem({ ...editItem, tahun: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
+                </label>
+              </div>
+              <label className="block font-semibold text-slate-700">Lokasi Ruang
+                <input required value={editItem.lokasi} onChange={(event) => setEditItem({ ...editItem, lokasi: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
+              </label>
+              <label className="block font-semibold text-slate-700">Status
+                <select value={editItem.status} onChange={(event) => setEditItem({ ...editItem, status: event.target.value as KoleksiItem["status"] })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal">
+                  <option value="DIPAMERKAN">DIPAMERKAN</option><option value="RESTORASI">RESTORASI</option><option value="SIMPAN">SIMPAN</option>
+                </select>
+              </label>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setEditItem(null)} className="rounded-lg border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50">Batal</button>
+                <button type="submit" className="rounded-lg bg-[#1C2D24] px-4 py-2 font-semibold text-white hover:bg-[#253d30]">Simpan Perubahan</button>
               </div>
             </form>
           </div>

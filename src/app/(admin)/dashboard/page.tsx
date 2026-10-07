@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 // Types
 interface Transaction {
@@ -50,12 +51,27 @@ export default function DashboardPage() {
   const pendapatanHariIni = todayTransactions.reduce((acc, t) => acc + t.total, 0);
 
   // Toggle & Read Notifikasi Handler
+  const notifRef = useRef<HTMLDivElement>(null);
+
   const handleToggleNotifications = () => {
     setNotificationsOpen((prev) => !prev);
     if (hasUnread) {
-      setHasUnread(false); // Hilangkan indikator merah saat pertama kali diklik
+      setHasUnread(false);
     }
   };
+
+  // Tutup notifikasi saat klik di luar
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+    if (notificationsOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [notificationsOpen]);
 
   // Fitur Filter Transaksi
   const filteredTransactions = transactions.filter((t) => {
@@ -86,7 +102,7 @@ export default function DashboardPage() {
           <p style={{ fontSize: "12px", color: "#777", margin: "4px 0 0 0" }}>Selamat datang kembali, Pengelola Museum</p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", position: "relative" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", position: "relative" }} ref={notifRef}>
           {/* Tombol Notifikasi Active */}
           <button
             onClick={handleToggleNotifications}
@@ -219,7 +235,7 @@ export default function DashboardPage() {
         <div style={{ backgroundColor: "#fff", padding: "18px", borderRadius: "12px", border: "1px solid #f0f0f0" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <span style={{ fontSize: "11px", fontWeight: "bold", color: "#444" }}>ULASAN TERBARU</span>
-            <a href="#" style={{ fontSize: "11px", color: "#b45309", fontWeight: "bold", textDecoration: "none" }}>Lihat Semua</a>
+            <Link href="/ulasan" style={{ fontSize: "11px", color: "#b45309", fontWeight: "bold", textDecoration: "none" }}>Lihat Semua</Link>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>

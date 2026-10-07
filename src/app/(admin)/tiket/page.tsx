@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 
@@ -96,10 +96,12 @@ export default function ManajemenTiketPage() {
   // State Filter & Modals
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState<TicketBooking | null>(null);
   const [scanModalBooking, setScanModalBooking] = useState<TicketBooking | null>(null);
   const [editCategory, setEditCategory] = useState<TicketCategory | null>(null);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const bookingsPerPage = 5;
 
   // Form New Category State
   const [newCatBadge, setNewCatBadge] = useState("");
@@ -120,6 +122,9 @@ export default function ManajemenTiketPage() {
     const matchesStatus = statusFilter === "ALL" || item.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalBookingPages = Math.max(1, Math.ceil(filteredBookings.length / bookingsPerPage));
+  const paginatedBookings = filteredBookings.slice((currentPage - 1) * bookingsPerPage, currentPage * bookingsPerPage);
 
   // Export CSV
   const handleExportCSV = () => {
@@ -297,7 +302,7 @@ export default function ManajemenTiketPage() {
                 type="text"
                 placeholder="Cari Kode / Nama..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 style={{
                   padding: "6px 12px 6px 28px",
                   fontSize: "11px",
@@ -315,7 +320,7 @@ export default function ManajemenTiketPage() {
             {/* Filter Status Dropdown */}
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
               style={{
                 padding: "6px 12px",
                 fontSize: "11px",
@@ -370,7 +375,7 @@ export default function ManajemenTiketPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredBookings.map((b) => (
+            {paginatedBookings.map((b) => (
               <tr key={b.id} style={{ borderBottom: "1px solid #FAFAF9" }}>
                 <td style={{ padding: "14px 20px", fontWeight: "800", color: "#1C1917" }}>{b.id}</td>
                 <td style={{ padding: "14px 20px", color: "#44403C" }}>{b.name}</td>
@@ -434,12 +439,13 @@ export default function ManajemenTiketPage() {
 
         {/* Footer Navigasi / Pagination */}
         <div style={{ padding: "12px 20px", borderTop: "1px solid #F5F5F4", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", color: "#78716C", fontFamily: "sans-serif" }}>
-          <span>Menampilkan 1 - {filteredBookings.length} dari {totalTerjualBulanIni} data</span>
+          <span>Menampilkan {filteredBookings.length ? (currentPage - 1) * bookingsPerPage + 1 : 0} - {Math.min(currentPage * bookingsPerPage, filteredBookings.length)} dari {filteredBookings.length} data</span>
           <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-            <button style={{ padding: "4px 10px", border: "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: "#FFFFFF", cursor: "pointer", fontSize: "11px", fontFamily: "sans-serif" }}>Sebelumnya</button>
-            <button style={{ padding: "4px 10px", border: "none", borderRadius: "6px", backgroundColor: "#224229", color: "#FFFFFF", fontWeight: "700", fontSize: "11px", fontFamily: "sans-serif" }}>1</button>
-            <button style={{ padding: "4px 10px", border: "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: "#FFFFFF", cursor: "pointer", fontSize: "11px", fontFamily: "sans-serif" }}>2</button>
-            <button style={{ padding: "4px 10px", border: "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: "#FFFFFF", cursor: "pointer", fontSize: "11px", fontFamily: "sans-serif" }}>Selanjutnya</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} style={{ padding: "4px 10px", border: "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: "#FFFFFF", cursor: currentPage === 1 ? "not-allowed" : "pointer", fontSize: "11px", fontFamily: "sans-serif", opacity: currentPage === 1 ? 0.5 : 1 }}>Sebelumnya</button>
+            {Array.from({ length: totalBookingPages }, (_, i) => i + 1).map((page) => (
+              <button key={page} onClick={() => setCurrentPage(page)} style={{ padding: "4px 10px", border: currentPage === page ? "none" : "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: currentPage === page ? "#224229" : "#FFFFFF", color: currentPage === page ? "#FFFFFF" : undefined, fontWeight: currentPage === page ? "700" : undefined, fontSize: "11px", fontFamily: "sans-serif", cursor: "pointer" }}>{page}</button>
+            ))}
+            <button disabled={currentPage === totalBookingPages} onClick={() => setCurrentPage((p) => Math.min(totalBookingPages, p + 1))} style={{ padding: "4px 10px", border: "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: "#FFFFFF", cursor: currentPage === totalBookingPages ? "not-allowed" : "pointer", fontSize: "11px", fontFamily: "sans-serif", opacity: currentPage === totalBookingPages ? 0.5 : 1 }}>Selanjutnya</button>
           </div>
         </div>
       </div>

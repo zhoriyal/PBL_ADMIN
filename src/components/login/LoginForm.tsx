@@ -23,6 +23,15 @@ export default function LoginForm() {
       return;
     }
 
+    // Validasi kredensial admin
+    const ADMIN_EMAIL = "admin@museum.com";
+    const ADMIN_PASSWORD = "admin123";
+
+    if (submittedEmail !== ADMIN_EMAIL || submittedPassword !== ADMIN_PASSWORD) {
+      setLoginError("Email atau password salah. Silakan coba lagi.");
+      return;
+    }
+
     if (formData.get("remember-me") === "on") {
       window.localStorage.setItem("museum-admin-email", submittedEmail);
     } else {
