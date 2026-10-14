@@ -1710,3 +1710,222 @@ textarea:focus-visible {
   }
 
 }
+
+/* =========================================
+   FIXED SIDEBAR + RESPONSIVE ADMIN LAYOUT
+   ========================================= */
+
+.admin-layout {
+  display: flex;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.admin-sidebar-shell {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 100;
+  width: 216px;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  background: var(--dark-green);
+  transition: transform 280ms ease;
+}
+
+.admin-sidebar-shell .sidebar {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  height: 100%;
+}
+
+.admin-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: calc(100% - 216px);
+  min-width: 0;
+  height: 100dvh;
+  margin-left: 216px;
+  overflow: hidden;
+}
+
+.admin-main {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 24px;
+  overflow-y: auto;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tombol menu hanya terlihat di layar kecil */
+.mobile-header {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* Tabel lebar boleh di-scroll tanpa menggeser sidebar */
+.admin-main table {
+  max-width: 100%;
+}
+
+/* =========================================
+   TABLET DAN HP
+   ========================================= */
+
+@media (max-width: 900px) {
+  .admin-sidebar-shell {
+    width: 260px;
+    max-width: 85vw;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 280ms ease,
+      visibility 280ms ease;
+  }
+
+  .admin-sidebar-shell.sidebar-open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .admin-content {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .mobile-header {
+    position: relative;
+    z-index: 50;
+    display: flex;
+    flex: 0 0 64px;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 0 18px;
+    background: #FCFBF8;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 2px 8px rgba(31, 42, 35, 0.04);
+  }
+
+  .mobile-menu-button {
+    display: inline-flex;
+    flex: 0 0 42px;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--dark-green);
+    cursor: pointer;
+  }
+
+  .mobile-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.1;
+  }
+
+  .mobile-brand span {
+    color: var(--text-gray);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+  }
+
+  .mobile-brand strong {
+    color: var(--dark-green);
+    font-size: 15px;
+    letter-spacing: 0.06em;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: rgba(12, 20, 14, 0.48);
+    cursor: pointer;
+    animation: sidebarOverlayIn 200ms ease;
+  }
+
+  .admin-main {
+    padding: 20px;
+  }
+}
+
+/* =========================================
+   HP KECIL
+   ========================================= */
+
+@media (max-width: 600px) {
+  .mobile-header {
+    flex-basis: 58px;
+    padding: 0 12px;
+  }
+
+  .mobile-menu-button {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .admin-main {
+    padding: 16px 12px;
+  }
+
+  .admin-page {
+    gap: 22px;
+    min-width: 0;
+  }
+
+  .admin-page-header {
+    padding-bottom: 16px;
+  }
+
+  .admin-page-title {
+    font-size: 23px;
+  }
+
+  /* Grid statistik mengikuti lebar layar */
+  .admin-main .grid {
+    min-width: 0;
+  }
+
+  /* Tabel tetap bisa di-scroll secara horizontal */
+  .admin-main table {
+    min-width: 600px;
+  }
+}
+
+@keyframes sidebarOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Hormati preferensi pengguna */
+@media (prefers-reduced-motion: reduce) {
+  .admin-sidebar-shell,
+  .sidebar-overlay {
+    transition: none;
+    animation: none;
+  }
+}

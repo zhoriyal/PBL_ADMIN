@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -21,14 +22,24 @@ const navItems = [
   { href: "/pengaturan", label: "Pengaturan", icon: Settings },
 ];
 
-export default function Sidebar() {
+type SidebarProps = {
+  onNavigate?: () => void;
+};
+
+export default function Sidebar({
+  onNavigate,
+}: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">
-          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <svg
+            viewBox="0 0 64 64"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
             <rect x="6" y="52" width="52" height="5" rx="2" />
             <rect x="10" y="30" width="6" height="22" rx="1" />
             <rect x="22" y="30" width="6" height="22" rx="1" />
@@ -37,6 +48,7 @@ export default function Sidebar() {
             <polygon points="4,30 32,10 60,30" />
           </svg>
         </div>
+
         <div className="sidebar-logo-text">
           <span className="sidebar-logo-museum">Museum</span>
           <span className="sidebar-logo-brawijaya">Brawijaya</span>
@@ -46,22 +58,35 @@ export default function Sidebar() {
       <nav className="sidebar-nav" aria-label="Navigasi admin">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
+
           return (
             <Link
               key={href}
               href={href}
               aria-current={isActive ? "page" : undefined}
-              className={`sidebar-nav-item${isActive ? " active" : ""}`}
+              className={`sidebar-nav-item${
+                isActive ? " active" : ""
+              }`}
+              onClick={onNavigate}
             >
-              <span className="sidebar-nav-icon"><Icon size={18} /></span>
-              <span className="sidebar-nav-label">{label}</span>
+              <span className="sidebar-nav-icon">
+                <Icon size={18} />
+              </span>
+
+              <span className="sidebar-nav-label">
+                {label}
+              </span>
             </Link>
           );
         })}
       </nav>
 
       <div className="sidebar-footer">
-        <Link href="/login" className="sidebar-logout">
+        <Link
+          href="/login"
+          className="sidebar-logout"
+          onClick={onNavigate}
+        >
           <LogOut size={18} />
           <span>Log Out</span>
         </Link>
