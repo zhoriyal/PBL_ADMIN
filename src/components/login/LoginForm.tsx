@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { authApi } from "@/lib/api";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const submittedEmail = String(formData.get("email") ?? "").trim();
@@ -23,22 +24,35 @@ export default function LoginForm() {
       return;
     }
 
-    // Validasi kredensial admin
-    const ADMIN_EMAIL = "admin@museum.com";
-    const ADMIN_PASSWORD = "admin123";
+    try {
+      const res = await authApi.login(submittedEmail, submittedPassword);
+      if (res && res.data && res.data.token) {
+        window.localStorage.setItem("museum-admin-token", res.data.token);
+        if (formData.get("remember-me") === "on") {
+          window.localStorage.setItem("museum-admin-email", submittedEmail);
+        } else {
+          window.localStorage.removeItem("museum-admin-email");
+        }
+        router.push("/dashboard");
+        return;
+      }
+    } catch {
+      // Fallback validasi offline
+      const ADMIN_EMAIL = "admin@museum.com";
+      const ADMIN_PASSWORD = "admin123";
 
-    if (submittedEmail !== ADMIN_EMAIL || submittedPassword !== ADMIN_PASSWORD) {
-      setLoginError("Email atau password salah. Silakan coba lagi.");
-      return;
+      if (submittedEmail === ADMIN_EMAIL && submittedPassword === ADMIN_PASSWORD) {
+        if (formData.get("remember-me") === "on") {
+          window.localStorage.setItem("museum-admin-email", submittedEmail);
+        } else {
+          window.localStorage.removeItem("museum-admin-email");
+        }
+        router.push("/dashboard");
+        return;
+      }
     }
 
-    if (formData.get("remember-me") === "on") {
-      window.localStorage.setItem("museum-admin-email", submittedEmail);
-    } else {
-      window.localStorage.removeItem("museum-admin-email");
-    }
-
-    router.push("/dashboard");
+    setLoginError("Email atau password salah. Silakan coba lagi.");
   };
 
   return (

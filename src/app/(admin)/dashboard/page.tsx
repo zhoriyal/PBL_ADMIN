@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { dashboardApi } from "@/lib/api";
 
 // Types
 interface Transaction {
@@ -9,12 +10,12 @@ interface Transaction {
   name: string;
   tickets: number;
   total: number;
-  status: "LUNAS" | "PENDING" | "BATAL";
+  status: "LUNAS" | "PENDING" | "BATAL" | "MENUNGGU";
   date: string;
 }
 
 interface Review {
-  id: string;
+  id: string | number;
   user: string;
   rating: number;
   comment: string;
@@ -22,33 +23,61 @@ interface Review {
 }
 
 export default function DashboardPage() {
-  // State Data Real (Dynamic)
-  const [transactions] = useState<Transaction[]>([
+  // State Data Real dari Backend
+  const [transactions, setTransactions] = useState<Transaction[]>([
     { id: "#MB-20261002-01", name: "Pandu Aji", tickets: 2, total: 20000, status: "LUNAS", date: "2026-10-02" },
     { id: "#MB-20261002-02", name: "Setiawan", tickets: 1, total: 10000, status: "LUNAS", date: "2026-10-02" },
     { id: "#MB-20261001-03", name: "Rayhan", tickets: 3, total: 30000, status: "LUNAS", date: "2026-10-01" },
     { id: "#MB-20261001-04", name: "Jordan", tickets: 2, total: 20000, status: "PENDING", date: "2026-10-01" },
   ]);
 
-  const [reviews] = useState<Review[]>([
+  const [reviews, setReviews] = useState<Review[]>([
     { id: "1", user: "Pengunjung #12", rating: 5.0, comment: "Koleksi sejarahnya sangat lengkap dan informatif!", date: "2 Okt 2026" },
     { id: "2", user: "Pengunjung #09", rating: 4.5, comment: "Pemesanan tiket online via web mobile sangat praktis.", date: "1 Okt 2026" },
   ]);
 
-  const [katalogCount] = useState<number>(48);
+  const [katalogCount, setKatalogCount] = useState<number>(48);
+  const [tiketTerjualHariIni, setTiketTerjualHariIni] = useState<number>(0);
+  const [pendapatanHariIni, setPendapatanHariIni] = useState<number>(0);
+  const [weeklyData, setWeeklyData] = useState<{ day: string; val: number }[]>([
+    { day: "Sen", val: 40 },
+    { day: "Sel", val: 65 },
+    { day: "Rab", val: 30 },
+    { day: "Kam", val: 85 },
+    { day: "Jum", val: 120 },
+    { day: "Sab", val: 142 },
+    { day: "Ming", val: 95 },
+  ]);
+  const [notificationsList, setNotificationsList] = useState<{ id: string; nama: string; total_tiket: number }[]>([]);
+
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
-  
-  // State Notifikasi
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [hasUnread, setHasUnread] = useState(true); // Indikator merah aktif di awal
-  
+  const [hasUnread, setHasUnread] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
 
-  // Dynamic Calculations
-  const todayStr = "2026-10-02";
-  const todayTransactions = transactions.filter((t) => t.date === todayStr && t.status === "LUNAS");
-  const tiketTerjualHariIni = todayTransactions.reduce((acc, t) => acc + t.tickets, 0);
-  const pendapatanHariIni = todayTransactions.reduce((acc, t) => acc + t.total, 0);
+  useEffect(() => {
+    async function fetchSummary() {
+      try {
+        const res = await dashboardApi.getSummary();
+        if (res.success && res.data) {
+          const d = res.data;
+          setTiketTerjualHariIni(d.terjualHariIni || 0);
+          setPendapatanHariIni(d.pendapatanHariIni || 0);
+          setKatalogCount(d.totalKoleksi || 0);
+          if (d.transactions && d.transactions.length > 0) setTransactions(d.transactions);
+          if (d.reviews && d.reviews.length > 0) setReviews(d.reviews);
+          if (d.weeklyData && d.weeklyData.length > 0) setWeeklyData(d.weeklyData);
+          if (d.notifications) {
+            setHasUnread(Boolean(d.notifications.hasUnread));
+            if (d.notifications.pendingBookings) setNotificationsList(d.notifications.pendingBookings);
+          }
+        }
+      } catch (e) {
+        console.warn("Using offline fallback dashboard data", e);
+      }
+    }
+    fetchSummary();
+  }, []);
 
   // Toggle & Read Notifikasi Handler
   const notifRef = useRef<HTMLDivElement>(null);
@@ -81,6 +110,7 @@ export default function DashboardPage() {
 
   // Fitur Ekspor Data ke CSV
   const exportToCSV = () => {
+    const todayStr = new Date().toISOString().slice(0, 10);
     const headers = ["ID Transaksi,Nama Pembeli,Jumlah Tiket,Total Biaya,Status,Tanggal\n"];
     const rows = transactions.map(
       (t) => `${t.id},${t.name},${t.tickets},${t.total},${t.status},${t.date}`
@@ -153,12 +183,17 @@ export default function DashboardPage() {
               }}
             >
               <span style={{ fontSize: "11px", fontWeight: "bold", color: "#444" }}>Notifikasi Terbaru</span>
-              <div style={{ fontSize: "10px", color: "#666", marginTop: "8px", paddingBottom: "6px", borderBottom: "1px solid #f0f0f0" }}>
-                📌 2 Tiket baru berhasil dipesan oleh Pandu Aji.
-              </div>
-              <div style={{ fontSize: "10px", color: "#666", marginTop: "6px" }}>
-                ⚠️ 1 Pembayaran pending membutuhkan konfirmasi.
-              </div>
+              {notificationsList.length > 0 ? (
+                notificationsList.map((n, i) => (
+                  <div key={i} style={{ fontSize: "10px", color: "#666", marginTop: "6px", paddingBottom: "4px", borderBottom: "1px solid #f0f0f0" }}>
+                    ⚠️ {n.total_tiket} Tiket ({n.nama}) butuh konfirmasi
+                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: "10px", color: "#888", marginTop: "8px" }}>
+                  Semua pembayaran telah dikonfirmasi.
+                </div>
+              )}
             </div>
           )}
 
@@ -213,18 +248,10 @@ export default function DashboardPage() {
           </div>
 
           <div style={{ height: "160px", backgroundColor: "#fafafa", borderRadius: "8px", padding: "16px", display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "12px", border: "1px solid #f0f0f0" }}>
-            {[
-              { day: "Sen", val: 40 },
-              { day: "Sel", val: 65 },
-              { day: "Rab", val: 30 },
-              { day: "Kam", val: 85 },
-              { day: "Jum", val: 120 },
-              { day: "Sab", val: 142 },
-              { day: "Ming", val: 95 },
-            ].map((item, idx) => (
+            {weeklyData.map((item, idx) => (
               <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
                 <span style={{ fontSize: "9px", color: "#666", fontWeight: "bold" }}>{item.val}</span>
-                <div style={{ width: "100%", backgroundColor: idx === 5 ? "#2563eb" : "#cbd5e1", height: `${(item.val / 150) * 100}px`, borderRadius: "4px", transition: "height 0.3s" }} />
+                <div style={{ width: "100%", backgroundColor: idx === weeklyData.length - 1 ? "#2563eb" : "#cbd5e1", height: `${Math.min(120, Math.max(6, (item.val / 100) * 100))}px`, borderRadius: "4px", transition: "height 0.3s" }} />
                 <span style={{ fontSize: "10px", color: "#888" }}>{item.day}</span>
               </div>
             ))}
