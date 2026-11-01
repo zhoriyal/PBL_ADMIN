@@ -52,17 +52,7 @@ export default function SettingsCenter() {
   };
 
   return (
-    <div className="-mx-4 -mt-4 min-h-screen bg-[#F5F0E8] font-sans text-slate-800 md:-mx-6 md:-mt-6">
-      <header className="flex min-h-[46px] items-center justify-between border-b border-slate-100 bg-white px-5 md:px-6">
-        <div>
-          <h1 className="text-sm font-bold uppercase leading-tight text-slate-800">Pengaturan Sistem</h1>
-          <p className="text-xs leading-tight text-slate-400">Kelola profil pengelola, konfigurasi operasional, dan keamanan sistem museum</p>
-        </div>
-        <div className="flex shrink-0 items-center gap-3 md:gap-5">
-          <button aria-label="Notifikasi" className="relative text-slate-700"><Bell size={15} fill="currentColor" /><span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-red-500" /></button>
-          <div className="flex items-center gap-2"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-white"><User size={13} fill="currentColor" /></span><span className="text-xs font-bold">ADMIN</span></div>
-        </div>
-      </header>
+    <div className="w-full min-h-screen bg-[#F5F0E8] font-sans text-slate-800">
 
       <div className="px-4 md:px-6">
         <nav className="flex gap-5 overflow-x-auto border-b border-slate-200" aria-label="Pengaturan">

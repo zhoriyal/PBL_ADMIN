@@ -1,18 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "../../components/admin/Sidebar";
+import Topbar from "../../components/admin/Topbar";
+import LogoutModal from "../../components/admin/LogoutModal";
+import AdminPageTransitionLoader from "../../components/admin/AdminPageTransitionLoader";
+import { clearStoredUser, useUserAuth } from "@/lib/user-auth";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const { isAuthenticated, loading } = useUserAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  // Proteksi rute frontend: Jika tidak ada sesi/token, arahkan ke /login dengan pesan popup
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      alert("Anda belum melakukan login. Silakan login terlebih dahulu untuk mengakses halaman admin.");
+      router.push("/login");
+    }
+  }, [isAuthenticated, loading, router]);
+
+  const handleConfirmLogout = async () => {
+    try {
+      clearStoredUser();
+    } catch (_) {}
+    setLogoutModalOpen(false);
+    router.push("/login");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F3EA]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-900 border-t-transparent" />
+          <p className="text-xs font-semibold tracking-wider text-emerald-950 uppercase">
+            Memuat Sistem Admin...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <div className="admin-layout">
+    <div className="admin-layout min-h-screen">
+      {/* Loading Screen Perpindahan Halaman Admin */}
+      <AdminPageTransitionLoader />
+
+      {/* Pop Up Konfirmasi Log Out */}
+      <LogoutModal
+        isOpen={logoutModalOpen}
+        onClose={() => setLogoutModalOpen(false)}
+        onConfirm={handleConfirmLogout}
+      />
+
       {/* Overlay untuk tampilan mobile */}
       {sidebarOpen && (
         <button
@@ -23,36 +73,19 @@ export default function AdminLayout({
         />
       )}
 
-      {/* Sidebar desktop dan mobile */}
-      <aside
-        className={`admin-sidebar-shell ${
-          sidebarOpen ? "sidebar-open" : ""
-        }`}
-      >
-        <Sidebar onNavigate={() => setSidebarOpen(false)} />
-      </aside>
+      {/* Sidebar Navigasi Admin */}
+      <Sidebar
+        onNavigate={() => setSidebarOpen(false)}
+        onOpenLogout={() => setLogoutModalOpen(true)}
+      />
 
-      {/* Konten utama */}
-      <div className="admin-content">
-        {/* Header mobile */}
-        <header className="mobile-header">
-          <button
-            type="button"
-            className="mobile-menu-button"
-            aria-label={sidebarOpen ? "Tutup menu" : "Buka menu"}
-            aria-expanded={sidebarOpen}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+      {/* Konten Utama Admin */}
+      <div className="admin-main">
+        <Topbar
+          onOpenLogout={() => setLogoutModalOpen(true)}
+        />
 
-          <div className="mobile-brand">
-            <span>MUSEUM</span>
-            <strong>BRAWIJAYA</strong>
-          </div>
-        </header>
-
-        <main className="admin-main">
+        <main className="admin-content">
           {children}
         </main>
       </div>

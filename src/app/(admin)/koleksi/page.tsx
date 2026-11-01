@@ -26,7 +26,7 @@ interface Stats {
   disimpan: number;
 }
 
-const emptyForm = { nama: "", sub_deskripsi: "", kategori: "Kendaraan", tahun: "", lokasi: "", status: "DIPAMERKAN" as KoleksiItem["status"] };
+const emptyForm = { nama: "", sub_deskripsi: "", kategori: "Kendaraan", tahun: "", lokasi: "", status: "DIPAMERKAN" as KoleksiItem["status"], image_url: "" };
 
 export default function KatalogKoleksiPage() {
   const [koleksiList, setKoleksiList] = useState<KoleksiItem[]>([]);
@@ -41,7 +41,40 @@ export default function KatalogKoleksiPage() {
   const [editItem, setEditItem] = useState<KoleksiItem | null>(null);
   const [formData, setFormData] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const itemsPerPage = 5;
+
+  // ─── Upload Foto Koleksi (Vercel Blob / Storage) ─────────────────────────
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const data = new FormData();
+      data.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Gagal upload gambar");
+      }
+
+      if (isEdit) {
+        setEditItem(prev => prev ? { ...prev, image_url: json.url } : null);
+      } else {
+        setFormData(prev => ({ ...prev, image_url: json.url }));
+      }
+    } catch (err: any) {
+      alert(err.message || "Gagal mengunggah foto koleksi.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   // ─── Fetch data dari backend ───────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -108,6 +141,7 @@ export default function KatalogKoleksiPage() {
         tahun: editItem.tahun,
         lokasi: editItem.lokasi,
         status: editItem.status,
+        image_url: editItem.image_url,
       });
       await fetchData();
       setEditItem(null);
@@ -140,16 +174,7 @@ export default function KatalogKoleksiPage() {
 
   return (
     <div className="w-full space-y-6">
-      {/* HEADER */}
-      <div className="-mx-4 -mt-4 flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between md:-mx-6 md:-mt-6 md:px-6">
-        <div>
-          <h1 className="text-sm font-bold tracking-tight text-slate-900 uppercase">Katalog Koleksi</h1>
-          <p className="text-xs text-slate-500 mt-1">Kelola informasi artefak, benda bersejarah, dan katalog pameran Museum Brawijaya</p>
-        </div>
-        <button onClick={fetchData} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full" title="Refresh">
-          <RefreshCw className="w-4 h-4" />
-        </button>
-      </div>
+
 
       {/* ERROR BANNER */}
       {error && (
@@ -337,6 +362,36 @@ export default function KatalogKoleksiPage() {
                   <option value="DIPAMERKAN">DIPAMERKAN</option><option value="RESTORASI">RESTORASI</option><option value="SIMPAN">SIMPAN</option>
                 </select>
               </label>
+
+              {/* Upload Foto Koleksi */}
+              <div className="rounded-lg border border-dashed border-slate-300 p-3 bg-slate-50/70">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="block font-semibold text-slate-700">Unggah Foto Koleksi</span>
+                  {formData.image_url && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, image_url: "" }))}
+                      className="text-[11px] text-red-600 hover:underline flex items-center gap-0.5"
+                    >
+                      <Trash2 className="w-3 h-3" /> Hapus Foto
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, false)}
+                  disabled={uploadingImage}
+                  className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-900 file:text-white hover:file:bg-emerald-950 cursor-pointer"
+                />
+                {uploadingImage && <p className="mt-1 text-[11px] text-amber-600">Mengunggah gambar...</p>}
+                {formData.image_url && (
+                  <div className="mt-2 flex items-center gap-3">
+                    <img src={formData.image_url} alt="Preview" className="w-16 h-16 object-cover rounded-md border border-slate-200" />
+                    <span className="text-[11px] text-emerald-700 font-medium">✓ Gambar terpilih</span>
+                  </div>
+                )}
+              </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setIsAddModalOpen(false)} className="rounded-lg border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50">Batal</button>
                 <button type="submit" disabled={saving} className="rounded-lg bg-[#1C2D24] px-4 py-2 font-semibold text-white hover:bg-[#253d30] disabled:opacity-50">
@@ -379,6 +434,36 @@ export default function KatalogKoleksiPage() {
                   <option value="DIPAMERKAN">DIPAMERKAN</option><option value="RESTORASI">RESTORASI</option><option value="SIMPAN">SIMPAN</option>
                 </select>
               </label>
+
+              {/* Upload / Ganti / Hapus Foto Koleksi */}
+              <div className="rounded-lg border border-dashed border-slate-300 p-3 bg-slate-50/70">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="block font-semibold text-slate-700">Foto Koleksi</span>
+                  {editItem.image_url && (
+                    <button
+                      type="button"
+                      onClick={() => setEditItem(prev => prev ? { ...prev, image_url: "" } : null)}
+                      className="text-[11px] text-red-600 hover:underline flex items-center gap-0.5"
+                    >
+                      <Trash2 className="w-3 h-3" /> Hapus Foto
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, true)}
+                  disabled={uploadingImage}
+                  className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-900 file:text-white hover:file:bg-emerald-950 cursor-pointer"
+                />
+                {uploadingImage && <p className="mt-1 text-[11px] text-amber-600">Mengunggah gambar...</p>}
+                {editItem.image_url && (
+                  <div className="mt-2 flex items-center gap-3">
+                    <img src={editItem.image_url} alt="Preview" className="w-16 h-16 object-cover rounded-md border border-slate-200" />
+                    <span className="text-[11px] text-emerald-700 font-medium">✓ Foto saat ini terpasang</span>
+                  </div>
+                )}
+              </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setEditItem(null)} className="rounded-lg border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-50">Batal</button>
                 <button type="submit" disabled={saving} className="rounded-lg bg-[#1C2D24] px-4 py-2 font-semibold text-white hover:bg-[#253d30] disabled:opacity-50">

@@ -41,8 +41,8 @@ export const tiketApi = {
     const q = new URLSearchParams(params).toString();
     return request('GET', `/tiket/bookings?${q}`);
   },
-  updateBookingStatus: (id, status) => request('PUT', `/tiket/bookings/${id}/status`, { status }),
-  checkIn: (id) => request('PUT', `/tiket/bookings/${id}/checkin`),
+  updateBookingStatus: (id, status) => request('PUT', `/tiket/bookings/${encodeURIComponent(id)}/status`, { status }),
+  checkIn: (id) => request('PUT', `/tiket/bookings/${encodeURIComponent(id)}/checkin`),
   getStats: () => request('GET', '/tiket/stats'),
 };
 

@@ -166,11 +166,7 @@ export default function ManajemenTiketPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div style={{ marginBottom: "24px" }}>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "28px", fontWeight: "normal", color: "#1C1917", margin: 0 }}>Manajemen Tiket</h1>
-        <p style={{ fontFamily: "sans-serif", fontSize: "13px", color: "#78716C", margin: "6px 0 0 0" }}>Kelola kategori tiket, harga, kuota, serta pemesanan tiket pengunjung</p>
-      </div>
+
 
       {/* Stats Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "24px" }}>

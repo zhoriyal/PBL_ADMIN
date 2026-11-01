@@ -24,10 +24,12 @@ const navItems = [
 
 type SidebarProps = {
   onNavigate?: () => void;
+  onOpenLogout?: () => void;
 };
 
 export default function Sidebar({
   onNavigate,
+  onOpenLogout,
 }: SidebarProps) {
   const pathname = usePathname();
 
@@ -82,14 +84,17 @@ export default function Sidebar({
       </nav>
 
       <div className="sidebar-footer">
-        <Link
-          href="/login"
-          className="sidebar-logout"
-          onClick={onNavigate}
+        <button
+          type="button"
+          className="sidebar-logout flex items-center gap-2 w-full text-left bg-transparent border-0 cursor-pointer"
+          onClick={() => {
+            if (onNavigate) onNavigate();
+            if (onOpenLogout) onOpenLogout();
+          }}
         >
           <LogOut size={18} />
           <span>Log Out</span>
-        </Link>
+        </button>
       </div>
     </aside>
   );
