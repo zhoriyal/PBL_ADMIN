@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User } from "./types";
-import { authApi, getAuthToken, removeAuthToken, setAuthToken } from "./api";
+import { authApi, getAuthToken, OFFLINE_MOCK_TOKEN, removeAuthToken, setAuthToken } from "./api";
 
 const USER_STORAGE_KEY = "museum-admin-user";
 
@@ -43,7 +43,14 @@ export function useUserAuth() {
 
     const token = getAuthToken();
     if (token) {
+<<<<<<< HEAD
       if (token === "offline-mock-token") {
+=======
+      if (token === OFFLINE_MOCK_TOKEN && process.env.NODE_ENV === "development") {
+        if (!cached) {
+          clearStoredUser();
+        }
+>>>>>>> bcf79bfe6fe60e77957d0e2ccf2734df9699f6e6
         setLoading(false);
         return;
       }
@@ -96,4 +103,3 @@ export function useUserAuth() {
     logout,
   };
 }
-

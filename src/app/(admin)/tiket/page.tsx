@@ -2,34 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { tiketApi } from "@/lib/api";
-
-interface TicketCategory {
-  id: number;
-  badge: string;
-  badge_bg: string;
-  badge_color: string;
-  title: string;
-  price: number;
-  kuota: number;
-  status: "Aktif" | "Nonaktif";
-}
-
-interface TicketBooking {
-  id: string;
-  nama: string;
-  email: string;
-  phone?: string;
-  kategori_dewasa: number;
-  kategori_pelajar: number;
-  kategori_wna: number;
-  total_tiket: number;
-  total_biaya: number;
-  sesi: string;
-  visit_date: string;
-  payment_method: string;
-  status: "LUNAS" | "MENUNGGU" | "BATAL";
-  checked_in: number;
-}
+import TicketStatsSection from "./components/TicketStatsSection";
+import TicketCategoriesSection from "./components/TicketCategoriesSection";
+import TicketBookingsSection from "./components/TicketBookingsSection";
+import type { TicketBooking, TicketCategory } from "./components/types";
 
 export default function ManajemenTiketPage() {
   const [categories, setCategories] = useState<TicketCategory[]>([]);
@@ -168,136 +144,31 @@ export default function ManajemenTiketPage() {
 
 
 
-      {/* Stats Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", marginBottom: "24px" }}>
-        {[
-          { label: "TOTAL TIKET TERJUAL HARI INI", value: loading ? "..." : `${stats.terjualHariIni}`, unit: "Tiket", icon: "🎫", bg: "#FEF3C7" },
-          { label: "SUDAH CHECK-IN HARI INI", value: loading ? "..." : `${stats.sudahCheckIn}`, unit: "Pengunjung", icon: "📲", bg: "#D1FAE5" },
-          { label: "PENDAPATAN HARI INI", value: loading ? "..." : `Rp ${stats.pendapatanHariIni.toLocaleString("id-ID")}`, unit: "", icon: "👝", bg: "#DBEAFE" },
-        ].map((card, i) => (
-          <div key={i} style={{ backgroundColor: "#FFFFFF", padding: "18px 20px", borderRadius: "14px", border: "1px solid #E7E5E4", display: "flex", alignItems: "center", gap: "16px" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "10px", backgroundColor: card.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>{card.icon}</div>
-            <div>
-              <span style={{ fontFamily: "sans-serif", fontSize: "10px", fontWeight: "700", color: "#A8A29E", letterSpacing: "0.5px", textTransform: "uppercase" }}>{card.label}</span>
-              <div style={{ marginTop: "2px", display: "flex", alignItems: "baseline", gap: "6px" }}>
-                <span style={{ fontFamily: "sans-serif", fontSize: "20px", fontWeight: "800", color: "#1C1917" }}>{card.value}</span>
-                {card.unit && <span style={{ fontFamily: "sans-serif", fontSize: "12px", color: "#78716C" }}>{card.unit}</span>}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <TicketStatsSection loading={loading} stats={stats} />
 
-      {/* Kategori Tiket */}
-      <div style={{ backgroundColor: "#FFFFFF", borderRadius: "14px", border: "1px solid #E7E5E4", padding: "20px", marginBottom: "24px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
-          <div>
-            <h2 style={{ fontFamily: "sans-serif", fontSize: "12px", fontWeight: "800", margin: 0, color: "#1C1917", letterSpacing: "0.5px" }}>KATEGORI & TARIF TIKET MASUK</h2>
-            <p style={{ fontFamily: "sans-serif", fontSize: "11px", color: "#78716C", margin: "4px 0 0 0" }}>Atur besaran harga tiket dan batas kuota harian pengunjung</p>
-          </div>
-          <button onClick={() => setIsAddCategoryOpen(true)}
-            style={{ backgroundColor: "#224229", color: "#FFFFFF", border: "none", borderRadius: "8px", padding: "8px 16px", fontSize: "12px", fontWeight: "600", fontFamily: "sans-serif", cursor: "pointer" }}>
-            + Tambah Kategori Tiket
-          </button>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-          {loading ? <p style={{ fontFamily: "sans-serif", fontSize: "12px", color: "#78716C" }}>Memuat kategori...</p> :
-            categories.map((cat) => (
-              <div key={cat.id} style={{ backgroundColor: "#FAFAF9", borderRadius: "10px", border: "1px solid #F5F5F4", padding: "16px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                  <span style={{ fontFamily: "sans-serif", backgroundColor: cat.badge_bg, color: cat.badge_color, fontSize: "9px", fontWeight: "800", padding: "3px 8px", borderRadius: "4px", letterSpacing: "0.5px" }}>{cat.badge}</span>
-                  <button onClick={() => setEditCategory({ ...cat })} style={{ fontFamily: "sans-serif", background: "none", border: "none", color: "#78716C", fontSize: "11px", cursor: "pointer", fontWeight: "600" }}>✏️ Edit</button>
-                </div>
-                <h3 style={{ fontFamily: "sans-serif", fontSize: "14px", fontWeight: "700", color: "#1C1917", margin: "0 0 4px 0" }}>{cat.title}</h3>
-                <div style={{ fontFamily: "sans-serif", display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "16px" }}>
-                  <span style={{ fontSize: "18px", fontWeight: "800", color: "#1C1917" }}>Rp {cat.price.toLocaleString("id-ID")}</span>
-                  <span style={{ fontSize: "11px", color: "#78716C" }}>/ orang</span>
-                </div>
-                <div style={{ fontFamily: "sans-serif", display: "flex", justifyContent: "space-between", borderTop: "1px dashed #E7E5E4", paddingTop: "10px", fontSize: "11px" }}>
-                  <span style={{ color: "#78716C" }}>Kuota: <strong style={{ color: "#1C1917" }}>{cat.kuota}</strong></span>
-                  <span style={{ color: cat.status === "Aktif" ? "#059669" : "#DC2626", fontWeight: "700" }}>{cat.status}</span>
-                </div>
-              </div>
-            ))}
-        </div>
-      </div>
+      <TicketCategoriesSection
+        loading={loading}
+        categories={categories}
+        onAdd={() => setIsAddCategoryOpen(true)}
+        onEdit={(category) => setEditCategory({ ...category })}
+      />
 
-      {/* Daftar Pemesanan */}
-      <div style={{ backgroundColor: "#FFFFFF", borderRadius: "14px", border: "1px solid #E7E5E4", overflow: "hidden" }}>
-        <div style={{ padding: "16px 20px", borderBottom: "1px solid #F5F5F4", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-          <div>
-            <h2 style={{ fontFamily: "sans-serif", fontSize: "12px", fontWeight: "800", margin: 0, color: "#1C1917", letterSpacing: "0.5px" }}>DAFTAR PEMESANAN & RIWAYAT TIKET</h2>
-            <p style={{ fontFamily: "sans-serif", fontSize: "11px", color: "#78716C", margin: "4px 0 0 0" }}>Data seluruh reservasi dan tiket yang telah dibeli pengunjung</p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "sans-serif" }}>
-            <div style={{ position: "relative" }}>
-              <input type="text" placeholder="Cari Kode / Nama..." value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                style={{ padding: "6px 12px 6px 28px", fontSize: "11px", borderRadius: "8px", border: "1px solid #E7E5E4", backgroundColor: "#FAFAF9", outline: "none", width: "180px", fontFamily: "sans-serif" }} />
-              <span style={{ position: "absolute", left: "8px", top: "6px", fontSize: "11px", color: "#A8A29E" }}>🔍</span>
-            </div>
-            <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-              style={{ padding: "6px 12px", fontSize: "11px", borderRadius: "8px", border: "1px solid #E7E5E4", backgroundColor: "#FAFAF9", outline: "none", cursor: "pointer", fontFamily: "sans-serif" }}>
-              <option value="ALL">Semua Status</option>
-              <option value="LUNAS">LUNAS</option>
-              <option value="MENUNGGU">MENUNGGU</option>
-              <option value="BATAL">BATAL</option>
-            </select>
-            <button onClick={handleExportCSV}
-              style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid #FEF08A", backgroundColor: "#FEFCE8", color: "#854D0E", fontSize: "11px", fontWeight: "700", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontFamily: "sans-serif" }}>
-              📥 Ekspor Data
-            </button>
-          </div>
-        </div>
-
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "11px", fontFamily: "sans-serif" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#FAFAF9", color: "#A8A29E", borderBottom: "1px solid #F5F5F4", fontSize: "10px", letterSpacing: "0.5px" }}>
-              <th style={{ padding: "12px 20px" }}>ID TRANSAKSI</th>
-              <th style={{ padding: "12px 20px" }}>NAMA PEMBELI</th>
-              <th style={{ padding: "12px 20px" }}>TOTAL TIKET</th>
-              <th style={{ padding: "12px 20px" }}>TGL KUNJUNGAN</th>
-              <th style={{ padding: "12px 20px" }}>TOTAL BIAYA</th>
-              <th style={{ padding: "12px 20px" }}>STATUS</th>
-              <th style={{ padding: "12px 20px", textAlign: "right" }}>AKSI</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={7} style={{ padding: "24px", textAlign: "center", color: "#78716C", fontFamily: "sans-serif" }}>Memuat data...</td></tr>
-            ) : paginatedBookings.map((b) => (
-              <tr key={b.id} style={{ borderBottom: "1px solid #FAFAF9" }}>
-                <td style={{ padding: "14px 20px", fontWeight: "800", color: "#1C1917" }}>{b.id}</td>
-                <td style={{ padding: "14px 20px", color: "#44403C" }}>{b.nama}</td>
-                <td style={{ padding: "14px 20px", color: "#44403C" }}>{b.total_tiket} Tiket</td>
-                <td style={{ padding: "14px 20px", color: "#44403C" }}>{b.visit_date}</td>
-                <td style={{ padding: "14px 20px", fontWeight: "800", color: "#1C1917" }}>Rp {b.total_biaya.toLocaleString("id-ID")}</td>
-                <td style={{ padding: "14px 20px" }}>
-                  <span style={{ backgroundColor: b.status === "LUNAS" ? "#D1FAE5" : b.status === "BATAL" ? "#FEE2E2" : "#FEF3C7", color: b.status === "LUNAS" ? "#047857" : b.status === "BATAL" ? "#DC2626" : "#B45309", padding: "3px 8px", borderRadius: "10px", fontSize: "9px", fontWeight: "800" }}>{b.status}</span>
-                </td>
-                <td style={{ padding: "14px 20px", textAlign: "right" }}>
-                  <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px" }}>
-                    <button onClick={() => setScanModalBooking(b)} style={{ backgroundColor: "#224229", color: "#FFFFFF", border: "none", borderRadius: "6px", padding: "4px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", fontFamily: "sans-serif" }}>🔲 Scan</button>
-                    <button onClick={() => setSelectedBooking(b)} style={{ color: "#2563EB", fontWeight: "700", border: "none", background: "none", cursor: "pointer", fontSize: "11px", fontFamily: "sans-serif" }}>Detail</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Pagination */}
-        <div style={{ padding: "12px 20px", borderTop: "1px solid #F5F5F4", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", color: "#78716C", fontFamily: "sans-serif" }}>
-          <span>Menampilkan {filteredBookings.length ? (currentPage - 1) * bookingsPerPage + 1 : 0} - {Math.min(currentPage * bookingsPerPage, filteredBookings.length)} dari {filteredBookings.length} data</span>
-          <div style={{ display: "flex", gap: "4px" }}>
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))} style={{ padding: "4px 10px", border: "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: "#FFFFFF", cursor: currentPage === 1 ? "not-allowed" : "pointer", opacity: currentPage === 1 ? 0.5 : 1 }}>Sebelumnya</button>
-            {Array.from({ length: totalBookingPages }, (_, i) => i + 1).map(p => (
-              <button key={p} onClick={() => setCurrentPage(p)} style={{ padding: "4px 10px", border: currentPage === p ? "none" : "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: currentPage === p ? "#224229" : "#FFFFFF", color: currentPage === p ? "#FFFFFF" : undefined, fontWeight: currentPage === p ? "700" : undefined, cursor: "pointer" }}>{p}</button>
-            ))}
-            <button disabled={currentPage === totalBookingPages} onClick={() => setCurrentPage(p => Math.min(totalBookingPages, p + 1))} style={{ padding: "4px 10px", border: "1px solid #E7E5E4", borderRadius: "6px", backgroundColor: "#FFFFFF", cursor: currentPage === totalBookingPages ? "not-allowed" : "pointer", opacity: currentPage === totalBookingPages ? 0.5 : 1 }}>Selanjutnya</button>
-          </div>
-        </div>
-      </div>
+      <TicketBookingsSection
+        loading={loading}
+        bookings={paginatedBookings}
+        filteredCount={filteredBookings.length}
+        searchQuery={searchQuery}
+        statusFilter={statusFilter}
+        currentPage={currentPage}
+        totalPages={totalBookingPages}
+        itemsPerPage={bookingsPerPage}
+        onSearchChange={(value) => { setSearchQuery(value); setCurrentPage(1); }}
+        onStatusChange={(value) => { setStatusFilter(value); setCurrentPage(1); }}
+        onPageChange={setCurrentPage}
+        onExport={handleExportCSV}
+        onShowDetail={setSelectedBooking}
+        onScan={setScanModalBooking}
+      />
 
       {/* Modal Detail Pemesanan */}
       {selectedBooking && (

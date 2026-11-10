@@ -1,25 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import {
-  Bell,
-  Camera,
-  Clock3,
-  LockKeyhole,
-  Save,
-  ShieldCheck,
-  User,
-  Users,
-} from "lucide-react";
-
-type SettingsTab = "profile" | "hours" | "security" | "notifications";
-
-const tabs: { id: SettingsTab; label: string; icon: typeof User }[] = [
-  { id: "profile", label: "Profil & Akun", icon: Users },
-  { id: "hours", label: "Jam Operasional & Tiket", icon: Clock3 },
-  { id: "security", label: "Keamanan & Sandi", icon: LockKeyhole },
-  { id: "notifications", label: "Notifikasi", icon: Bell },
-];
+import { Save, ShieldCheck } from "lucide-react";
+import SettingsTabNavigation, { type SettingsTab } from "./SettingsTabNavigation";
+import ProfileSummaryCard from "./ProfileSummaryCard";
 
 const fieldClass = "mt-1.5 h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[11px] font-normal text-slate-700 outline-none focus:border-slate-400";
 const panelClass = "rounded-xl border border-slate-200/80 bg-white shadow-sm";
@@ -55,29 +39,11 @@ export default function SettingsCenter() {
     <div className="w-full min-h-screen bg-[#F5F0E8] font-sans text-slate-800">
 
       <div className="px-4 md:px-6">
-        <nav className="flex gap-5 overflow-x-auto border-b border-slate-200" aria-label="Pengaturan">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button key={id} onClick={() => setActiveTab(id)} className={`flex shrink-0 items-center gap-1.5 border-b-2 px-1 py-3 text-[10px] font-bold uppercase tracking-wide ${activeTab === id ? "border-[#2D3E33] text-[#2D3E33]" : "border-transparent text-slate-400 hover:text-slate-700"}`}>
-              <Icon size={12} fill={id === "profile" || id === "notifications" ? "currentColor" : "none"} />{label}
-            </button>
-          ))}
-        </nav>
+        <SettingsTabNavigation activeTab={activeTab} onChange={setActiveTab} />
 
         {activeTab === "profile" && (
           <div className="grid grid-cols-1 gap-4 py-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-            <section className={`${panelClass} px-4 py-5`}>
-              <div className="flex flex-col items-center text-center">
-                <div className="relative flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-amber-100 bg-slate-900 text-white shadow-sm"><User size={30} fill="currentColor" /><button aria-label="Ubah foto profil" className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-[#2D3E33] text-white"><Camera size={11} /></button></div>
-                <h2 className="mt-3 text-sm font-bold">Administrator Utama</h2>
-                <p className="text-[10px] text-slate-400">{profile.email}</p>
-                <span className="mt-2 rounded-full bg-amber-100 px-2.5 py-1 text-[8px] font-bold uppercase text-amber-800">Super Admin</span>
-              </div>
-              <div className="mt-4 space-y-2.5 border-t border-slate-100 pt-4 text-[10px]">
-                <p className="flex justify-between gap-2"><span className="text-slate-400">ID Pengelola:</span><strong>ADM-MBW-01</strong></p>
-                <p className="flex justify-between gap-2"><span className="text-slate-400">Terakhir Login:</span><strong>Hari ini, 11:34 WIB</strong></p>
-                <p className="flex justify-between gap-2"><span className="text-slate-400">Status Akun:</span><strong className="text-emerald-600">Aktif</strong></p>
-              </div>
-            </section>
+            <ProfileSummaryCard email={profile.email} />
 
             <form onSubmit={saveSettings} className={`${panelClass} p-4`}>
               <div className="border-b border-slate-100 pb-3"><h2 className="text-[11px] font-bold uppercase">Informasi Akun & Pengelola</h2><p className="text-[9px] text-slate-400">Perbarui data diri dan kontak resmi pengelola museum</p></div>

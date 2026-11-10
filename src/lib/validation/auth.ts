@@ -5,7 +5,7 @@ export function validateEmail(email: string): string | null {
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(trimmed)) {
-    return "Format email tidak valid.";
+    return "Format email tidak valid. Gunakan format nama@domain.com.";
   }
   return null;
 }
@@ -14,8 +14,8 @@ export function validatePassword(password: string): string | null {
   if (!password) {
     return "Password wajib diisi.";
   }
-  if (password.length < 6) {
-    return "Password minimal terdiri dari 6 karakter.";
+  if (password.length < 8) {
+    return "Password minimal terdiri dari 8 karakter.";
   }
   return null;
 }
@@ -48,4 +48,3 @@ export function validateRegisterInput(data: {
 
   return errors;
 }
-

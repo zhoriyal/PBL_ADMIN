@@ -18,10 +18,17 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
+<<<<<<< HEAD
   // Proteksi rute frontend: Jika tidak ada sesi/token, arahkan ke /login
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/login");
+=======
+  // Keep the client-side session check in sync with the request-level proxy guard.
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.replace("/login");
+>>>>>>> bcf79bfe6fe60e77957d0e2ccf2734df9699f6e6
     }
   }, [isAuthenticated, loading, router]);
 
