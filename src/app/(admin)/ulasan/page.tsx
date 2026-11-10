@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from "next";
-import ReviewCenter from "@/components/admin/ReviewCenter";
+import ReviewCenter from "./components/ReviewCenter";
 
 export const metadata: Metadata = {
   title: "Ulasan / Feedback — Admin Museum Brawijaya",

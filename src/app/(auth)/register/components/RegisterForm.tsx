@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api";
-import { validateRegisterInput } from "@/lib/validation/auth";
+import { validateEmail, validatePassword, validateRegisterInput } from "@/lib/validation/auth";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -23,10 +23,19 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: "" });
-    }
+    const { name, value } = e.target;
+    setFormData((current) => ({ ...current, [name]: value }));
+    setErrors((current) => {
+      const nextErrors = { ...current };
+      if (name === "email") {
+        nextErrors.email = value ? validateEmail(value) || "" : "";
+      } else if (name === "password") {
+        nextErrors.password = value ? validatePassword(value) || "" : "";
+      } else if (nextErrors[name]) {
+        nextErrors[name] = "";
+      }
+      return nextErrors;
+    });
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -176,10 +185,16 @@ export default function RegisterForm() {
                   placeholder="staf@museum.com"
                   className="input-field"
                   value={formData.email}
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? "register-email-error" : undefined}
                   onChange={handleChange}
                 />
               </div>
-              {errors.email && <p className="mt-1 text-[11px] text-red-600">{errors.email}</p>}
+              {errors.email && (
+                <p id="register-email-error" className="mt-1 text-[11px] text-red-600" role="alert">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             {/* Role Field */}
@@ -204,7 +219,7 @@ export default function RegisterForm() {
             {/* Password Field */}
             <div className="field-group">
               <label htmlFor="password" className="field-label">
-                Kata Sandi (Minimal 6 karakter)
+                Kata Sandi (Minimal 8 karakter)
               </label>
               <div className="input-wrapper">
                 <input
@@ -215,6 +230,8 @@ export default function RegisterForm() {
                   placeholder="••••••••"
                   className="input-field password-input"
                   value={formData.password}
+                  aria-invalid={Boolean(errors.password)}
+                  aria-describedby={errors.password ? "register-password-error" : undefined}
                   onChange={handleChange}
                 />
                 <button
@@ -225,7 +242,11 @@ export default function RegisterForm() {
                   {showPassword ? "🙈" : "👁️"}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-[11px] text-red-600">{errors.password}</p>}
+              {errors.password && (
+                <p id="register-password-error" className="mt-1 text-[11px] text-red-600" role="alert">
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             {/* Confirm Password Field */}
@@ -267,4 +288,3 @@ export default function RegisterForm() {
     </div>
   );
 }
-

@@ -1,23 +1,11 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Search, Plus, Eye, Edit, Trash2, Box, ShieldCheck, Wrench, FileText, Shirt, X, RefreshCw,
-} from "lucide-react";
+import { Search, Plus, Trash2, X } from "lucide-react";
 import { koleksiApi } from "@/lib/api";
-
-interface KoleksiItem {
-  id: number;
-  kode: string;
-  nama: string;
-  sub_deskripsi: string;
-  deskripsi_lengkap?: string;
-  kategori: string;
-  tahun: string;
-  lokasi: string;
-  status: "DIPAMERKAN" | "RESTORASI" | "SIMPAN";
-  image_url?: string;
-}
+import CollectionStatsSection from "./components/CollectionStatsSection";
+import CollectionTableSection from "./components/CollectionTableSection";
+import type { KoleksiItem } from "./components/types";
 
 interface Stats {
   total: number;
@@ -164,14 +152,6 @@ export default function KatalogKoleksiPage() {
     }
   };
 
-  const categoryIcon = (kat: string) => {
-    if (kat === "Kendaraan") return <Box className="w-4 h-4 text-amber-600" />;
-    if (kat === "Senjata") return <ShieldCheck className="w-4 h-4 text-blue-600" />;
-    if (kat === "Dokumen") return <FileText className="w-4 h-4 text-purple-600" />;
-    if (kat === "Pakaian") return <Shirt className="w-4 h-4 text-rose-600" />;
-    return <Box className="w-4 h-4 text-slate-400" />;
-  };
-
   return (
     <div className="w-full space-y-6">
 
@@ -184,30 +164,7 @@ export default function KatalogKoleksiPage() {
         </div>
       )}
 
-      {/* STATS CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="p-2.5 bg-amber-50 text-amber-600 rounded-lg"><Box className="w-5 h-5" /></div>
-          <div>
-            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Total Koleksi Terdata</p>
-            <p className="text-lg font-bold text-slate-800">{loading ? "..." : stats.total} <span className="text-xs font-normal text-slate-500">Item</span></p>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-lg"><ShieldCheck className="w-5 h-5" /></div>
-          <div>
-            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Koleksi Dipamerkan</p>
-            <p className="text-lg font-bold text-slate-800">{loading ? "..." : stats.dipamerkan} <span className="text-xs font-normal text-slate-500">Item</span></p>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg"><Wrench className="w-5 h-5" /></div>
-          <div>
-            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Restorasi / Simpan</p>
-            <p className="text-lg font-bold text-slate-800">{loading ? "..." : stats.restorasi + stats.disimpan} <span className="text-xs font-normal text-slate-500">Item</span></p>
-          </div>
-        </div>
-      </div>
+      <CollectionStatsSection loading={loading} stats={stats} />
 
       {/* TABLE */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -235,80 +192,18 @@ export default function KatalogKoleksiPage() {
           </div>
         </div>
 
-        {/* TABEL */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4">No. Inventaris</th>
-                <th className="py-3 px-4">Artefak / Koleksi</th>
-                <th className="py-3 px-4">Kategori</th>
-                <th className="py-3 px-4">Tahun / Era</th>
-                <th className="py-3 px-4">Lokasi Ruang</th>
-                <th className="py-3 px-4">Status Display</th>
-                <th className="py-3 px-4 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-              {loading ? (
-                <tr><td colSpan={7} className="py-10 text-center text-slate-400">
-                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />Memuat data dari server...
-                </td></tr>
-              ) : currentItems.length > 0 ? currentItems.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/50 transition">
-                  <td className="py-3 px-4 font-semibold text-slate-900">{item.kode}</td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">{categoryIcon(item.kategori)}</div>
-                      <div className="min-w-0 max-w-[200px]">
-                        <p className="font-bold text-slate-800 truncate">{item.nama}</p>
-                        <p className="text-[11px] text-slate-400 truncate">{item.sub_deskripsi}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">{item.kategori}</span>
-                  </td>
-                  <td className="py-3 px-4 whitespace-nowrap">{item.tahun}</td>
-                  <td className="py-3 px-4 whitespace-nowrap">{item.lokasi}</td>
-                  <td className="py-3 px-4 whitespace-nowrap">
-                    <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider ${
-                      item.status === "DIPAMERKAN" ? "bg-emerald-100/80 text-emerald-800" :
-                      item.status === "RESTORASI"  ? "bg-blue-100/80 text-blue-800" : "bg-slate-100 text-slate-600"
-                    }`}>{item.status}</span>
-                  </td>
-                  <td className="py-3 px-4 whitespace-nowrap text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button onClick={() => setSelectedDetail(item)} className="flex items-center gap-0.5 text-blue-600 hover:text-blue-800 font-medium text-[11px]">
-                        <Eye className="w-3.5 h-3.5" /> Detail
-                      </button>
-                      <button onClick={() => setEditItem({ ...item })} className="flex items-center gap-0.5 text-amber-600 hover:text-amber-800 font-medium text-[11px]">
-                        <Edit className="w-3.5 h-3.5" /> Edit
-                      </button>
-                      <button onClick={() => handleDelete(item.id)} className="flex items-center gap-0.5 text-red-600 hover:text-red-800 font-medium text-[11px]">
-                        <Trash2 className="w-3.5 h-3.5" /> Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )) : (
-                <tr><td colSpan={7} className="py-8 text-center text-xs text-slate-400">Tidak ada koleksi yang ditemukan.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINATION */}
-        <div className="p-3 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
-          <p>Menampilkan {filteredKoleksi.length ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredKoleksi.length)} dari {filteredKoleksi.length} koleksi</p>
-          <div className="flex items-center gap-1">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50">Sebelumnya</button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button key={page} onClick={() => setCurrentPage(page)} className={`w-7 h-7 rounded font-bold ${currentPage === page ? "bg-[#1C2D24] text-white" : "border border-slate-200 bg-white hover:bg-slate-50"}`}>{page}</button>
-            ))}
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} className="px-2.5 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50">Selanjutnya</button>
-          </div>
-        </div>
+      <CollectionTableSection
+        loading={loading}
+        items={currentItems}
+        filteredCount={filteredKoleksi.length}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onShowDetail={setSelectedDetail}
+        onEdit={(item) => setEditItem({ ...item })}
+        onDelete={handleDelete}
+      />
       </div>
 
       {/* MODAL DETAIL */}

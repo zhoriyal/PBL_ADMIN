@@ -1,23 +1,37 @@
+import { AUTH_TOKEN_COOKIE } from "./auth-constants";
+
 /**
  * API Client untuk Admin Next.js
  * Terhubung ke backend Express.js di http://localhost:3001
  */
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+export const OFFLINE_MOCK_TOKEN = 'offline-mock-token';
+
+export class ApiNetworkError extends Error {
+  constructor(message = 'Backend tidak dapat dijangkau') {
+    super(message);
+    this.name = 'ApiNetworkError';
+  }
+}
 
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return window.localStorage.getItem('museum-admin-token');
+  return window.localStorage.getItem(AUTH_TOKEN_COOKIE);
 }
 
 export function setAuthToken(token: string): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem('museum-admin-token', token);
+  window.localStorage.setItem(AUTH_TOKEN_COOKIE, token);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${AUTH_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=86400; SameSite=Lax${secure}`;
 }
 
 export function removeAuthToken(): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.removeItem('museum-admin-token');
+  window.localStorage.removeItem(AUTH_TOKEN_COOKIE);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${AUTH_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
 }
 
 async function request<T = any>(method: string, path: string, body?: any): Promise<T> {
@@ -36,15 +50,44 @@ async function request<T = any>(method: string, path: string, body?: any): Promi
   };
   if (body) options.body = JSON.stringify(body);
 
-  const res = await fetch(`${BASE_URL}${path}`, options);
-  const data = await res.json();
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, options);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new ApiNetworkError();
+    }
+    throw error;
+  }
+
+  let data: T & { message?: string };
+  try {
+    data = await res.json() as T & { message?: string };
+  } catch {
+    throw new Error('Respons backend tidak valid');
+  }
+
   if (!res.ok) throw new Error(data.message || 'Request gagal');
   return data;
 }
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
+interface LoginResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    token?: string;
+    id?: number | string;
+    nama?: string;
+    username?: string;
+    email?: string;
+    role?: 'ADMIN' | 'SUPERADMIN' | 'STAFF' | 'USER';
+  };
+}
+
 export const authApi = {
-  login: (username: string, password: string) => request('POST', '/auth/login', { username, password }),
+  login: (username: string, password: string) =>
+    request<LoginResponse>('POST', '/auth/login', { username, password }),
   register: (data: { nama: string; email: string; password: string; role?: string }) => 
     request('POST', '/auth/register', data),
   logout: () => request('POST', '/auth/logout'),
@@ -113,4 +156,3 @@ export const informasiApi = {
   getJamOperasional: () => request('GET', '/informasi/jam-operasional'),
   updateJamOperasional: (data: any) => request('PUT', '/informasi/jam-operasional', data),
 };
-

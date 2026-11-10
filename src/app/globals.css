@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
 
 :root {
   --cream: #F5F0E8;
@@ -1750,14 +1751,24 @@ textarea:focus-visible {
 }
 
 .admin-content {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  width: calc(100% - 216px);
+  display: block;
+  width: 100%;
   min-width: 0;
-  height: 100dvh;
-  margin-left: 216px;
-  overflow: hidden;
+  height: auto;
+}
+
+.dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dashboard-insights-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(240px, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .admin-main {
@@ -1804,11 +1815,6 @@ textarea:focus-visible {
   .admin-sidebar-shell.sidebar-open {
     transform: translateX(0);
     visibility: visible;
-  }
-
-  .admin-content {
-    width: 100%;
-    margin-left: 0;
   }
 
   .mobile-header {
@@ -1918,6 +1924,23 @@ textarea:focus-visible {
   /* Tabel tetap bisa di-scroll secara horizontal */
   .admin-main table {
     min-width: 600px;
+  }
+
+}
+
+@media (max-width: 760px) {
+  .dashboard-insights-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

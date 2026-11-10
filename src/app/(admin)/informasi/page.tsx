@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from "next";
-import InfoCenter from "@/components/admin/InfoCenter";
+import InfoCenter from "./components/InfoCenter";
 
 export const metadata: Metadata = {
   title: "Pusat Informasi — Admin Museum Brawijaya",
