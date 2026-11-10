@@ -43,6 +43,11 @@ export function useUserAuth() {
 
     const token = getAuthToken();
     if (token) {
+      if (token === "offline-mock-token") {
+        setLoading(false);
+        return;
+      }
+
       authApi.me()
         .then((res) => {
           if (res.success && res.data) {
@@ -58,9 +63,11 @@ export function useUserAuth() {
           }
         })
         .catch(() => {
-          // Token expired or invalid
-          clearStoredUser();
-          setUser(null);
+          // Jika token tidak valid / server belum running, jangan paksa buang user jika cached ada
+          if (!cached) {
+            clearStoredUser();
+            setUser(null);
+          }
         })
         .finally(() => {
           setLoading(false);

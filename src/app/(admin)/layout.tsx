@@ -18,10 +18,9 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-  // Proteksi rute frontend: Jika tidak ada sesi/token, arahkan ke /login dengan pesan popup
+  // Proteksi rute frontend: Jika tidak ada sesi/token, arahkan ke /login
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      alert("Anda belum melakukan login. Silakan login terlebih dahulu untuk mengakses halaman admin.");
       router.push("/login");
     }
   }, [isAuthenticated, loading, router]);

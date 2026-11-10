@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --cream: #F5F0E8;
-  --cream-dark: #EDE8DC;
-  --dark-green: #2C4A2C;
-  --dark-green-hover: #1E3A1E;
-  --olive-green: #3D5C3D;
-  --gold: #C9A84C;
-  --text-dark: #1A1A1A;
-  --text-gray: #6B6B6B;
-  --border-light: #D8D0C0;
-  --input-bg: #F8F4EC;
+  --cream: #f5f0e8;
+  --cream-dark: #ede8dc;
+  --dark-green: #2c4a2c;
+  --dark-green-hover: #1e3a1e;
+  --olive-green: #3d5c3d;
+  --gold: #c9a84c;
+  --text-dark: #1a1a1a;
+  --text-gray: #6b6b6b;
+  --border-light: #d8d0c0;
+  --input-bg: #f8f4ec;
 }
 
 * {
@@ -20,104 +20,95 @@
 body {
   background-color: var(--cream);
   color: var(--text-dark);
-  font-family: 'EB Garamond', Georgia, serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: EB Garamond, Georgia, serif;
 }
 
-/* Login Page Styles */
 .login-container {
-  display: flex;
   width: 100vw;
   height: 100vh;
+  display: flex;
   overflow: hidden;
 }
 
-/* LEFT PANEL - Image */
 .login-left {
-  position: relative;
   flex: 1;
+  position: relative;
   overflow: hidden;
 }
 
 .login-left img {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
   object-position: center;
+  width: 100%;
+  height: 100%;
 }
 
 .login-left-overlay {
+  background: linear-gradient(to top, #000000a6 0%, #0003 40%, #0000000d 100%);
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.65) 0%,
-    rgba(0, 0, 0, 0.2) 40%,
-    rgba(0, 0, 0, 0.05) 100%
-  );
 }
 
 .login-left-caption {
+  padding: 32px 36px;
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 32px 36px;
 }
 
 .login-left-caption .label {
-  font-family: 'EB Garamond', Georgia, serif;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: #ffffffbf;
+  margin-bottom: 4px;
+  font-family: EB Garamond, Georgia, serif;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
-  margin-bottom: 4px;
 }
 
 .login-left-caption .museum-name {
-  font-family: 'EB Garamond', Georgia, serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  font-family: EB Garamond, Georgia, serif;
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #ffffff;
 }
 
-/* RIGHT PANEL - Form */
 .login-right {
+  background-color: var(--cream);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: 480px;
   min-width: 420px;
-  background-color: var(--cream);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 60px 56px;
+  display: flex;
   position: relative;
 }
 
 .version-tag {
+  color: var(--text-gray);
+  letter-spacing: .05em;
+  font-size: 11px;
   position: absolute;
   top: 28px;
   right: 36px;
-  font-size: 11px;
-  color: var(--text-gray);
-  letter-spacing: 0.05em;
 }
 
-/* Logo */
 .museum-logo {
-  width: 80px;
-  height: 80px;
   background-color: var(--dark-green);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
   margin-bottom: 28px;
-  box-shadow: 0 4px 20px rgba(44, 74, 44, 0.3);
+  display: flex;
+  box-shadow: 0 4px 20px #2c4a2c4d;
 }
 
 .museum-logo svg {
@@ -126,48 +117,46 @@ body {
   fill: var(--gold);
 }
 
-/* Headings */
 .login-title {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--text-dark);
   text-align: center;
   margin-bottom: 8px;
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 34px;
+  font-weight: 700;
 }
 
 .login-subtitle {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 14px;
   color: var(--text-gray);
   text-align: center;
+  letter-spacing: .02em;
   margin-bottom: 40px;
-  letter-spacing: 0.02em;
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 14px;
 }
 
-/* Form */
 .login-form {
-  width: 100%;
-  display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  display: flex;
 }
 
 .form-group {
-  display: flex;
   flex-direction: column;
   gap: 7px;
+  display: flex;
 }
 
 .form-label {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: .1em;
   text-transform: capitalize;
   color: var(--text-dark);
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .form-input-wrapper {
@@ -176,84 +165,83 @@ body {
 
 .form-input {
   width: 100%;
-  padding: 13px 16px;
-  background-color: #EEEAE0;
-  border: 1.5px solid transparent;
-  border-radius: 8px;
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 14px;
   color: var(--text-dark);
+  background-color: #eeeae0;
+  border: 1.5px solid #0000;
+  border-radius: 8px;
   outline: none;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  padding: 13px 16px;
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 14px;
+  transition: border-color .2s, background-color .2s;
 }
 
 .form-input::placeholder {
-  color: #ABA89F;
+  color: #aba89f;
   font-style: italic;
 }
 
 .form-input:focus {
   border-color: var(--dark-green);
-  background-color: #F0EDE5;
+  background-color: #f0ede5;
 }
 
 .password-toggle {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
   cursor: pointer;
   color: var(--text-gray);
-  padding: 4px;
-  display: flex;
+  background: none;
+  border: none;
   align-items: center;
-  transition: color 0.2s;
+  padding: 4px;
+  transition: color .2s;
+  display: flex;
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
 }
 
 .password-toggle:hover {
   color: var(--dark-green);
 }
 
-/* Remember Me & Forgot Password */
 .form-options {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   margin-top: -4px;
+  display: flex;
 }
 
 .remember-me {
-  display: flex;
+  cursor: pointer;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+  display: flex;
 }
 
 .remember-me input[type="checkbox"] {
+  border: 1.5px solid var(--border-light);
+  cursor: pointer;
   width: 16px;
   height: 16px;
-  border: 1.5px solid var(--border-light);
-  border-radius: 3px;
-  cursor: pointer;
   accent-color: var(--dark-green);
+  border-radius: 3px;
 }
 
 .remember-me span {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 13px;
   color: var(--text-dark);
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 13px;
 }
 
 .forgot-password {
-  font-family: 'EB Garamond', Georgia, serif;
+  color: var(--text-dark);
+  letter-spacing: .02em;
+  font-family: EB Garamond, Georgia, serif;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-dark);
   text-decoration: none;
-  letter-spacing: 0.02em;
-  transition: color 0.2s;
+  transition: color .2s;
 }
 
 .forgot-password:hover {
@@ -261,51 +249,48 @@ body {
   text-decoration: underline;
 }
 
-/* Button */
 .btn-masuk {
-  width: 100%;
-  padding: 15px;
   background-color: var(--dark-green);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  color: #fff;
+  letter-spacing: .18em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.25s ease, transform 0.1s ease, box-shadow 0.25s ease;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
   margin-top: 4px;
-  box-shadow: 0 2px 12px rgba(44, 74, 44, 0.2);
+  padding: 15px;
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 15px;
+  font-weight: 700;
+  transition: background-color .25s, transform .1s, box-shadow .25s;
+  box-shadow: 0 2px 12px #2c4a2c33;
 }
 
 .btn-masuk:hover {
   background-color: var(--dark-green-hover);
-  box-shadow: 0 4px 20px rgba(44, 74, 44, 0.35);
   transform: translateY(-1px);
+  box-shadow: 0 4px 20px #2c4a2c59;
 }
 
 .btn-masuk:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(44, 74, 44, 0.2);
+  box-shadow: 0 2px 8px #2c4a2c33;
 }
 
-/* Security Notice */
 .security-notice {
-  margin-top: 28px;
   text-align: center;
+  margin-top: 28px;
   padding: 0 8px;
 }
 
 .security-notice p {
-  font-family: 'EB Garamond', Georgia, serif;
+  color: #8a8680;
+  font-family: EB Garamond, Georgia, serif;
   font-size: 12px;
-  color: #8A8680;
   line-height: 1.6;
 }
 
-/* Responsive */
 @media (max-width: 900px) {
   .login-left {
     display: none;
@@ -318,57 +303,49 @@ body {
   }
 }
 
-/* =====================================================
-   ADMIN LAYOUT (Shared: Dashboard, Tiket, Koleksi, etc.)
-   ===================================================== */
-
 .admin-layout {
-  display: flex;
+  background-color: #f0ece4;
   width: 100vw;
   height: 100vh;
+  display: flex;
   overflow: hidden;
-  background-color: #F0ECE4;
 }
 
 .admin-main {
   flex: 1;
+  padding: 36px 40px;
   overflow-y: auto;
 }
 
-/* =====================================================
-   SIDEBAR
-   ===================================================== */
-
 .sidebar {
-  width: 216px;
-  min-width: 216px;
-  min-height: 100vh;
   background-color: var(--dark-green);
-  display: flex;
   flex-direction: column;
+  width: 240px;
+  min-width: 240px;
   padding: 28px 0;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  box-shadow: 4px 0 20px #00000026;
 }
 
 .sidebar-logo {
-  display: flex;
+  border-bottom: 1px solid #ffffff1a;
   align-items: center;
   gap: 12px;
-  padding: 0 18px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 12px;
+  padding: 0 24px 28px;
+  display: flex;
 }
 
 .sidebar-logo-icon {
-  width: 36px;
-  height: 36px;
-  background-color: rgba(255, 255, 255, 0.12);
+  background-color: #ffffff1f;
+  border: 1.5px solid #c9a84c80;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  border: 1.5px solid rgba(201, 168, 76, 0.5);
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  display: flex;
 }
 
 .sidebar-logo-icon svg {
@@ -378,67 +355,67 @@ body {
 }
 
 .sidebar-logo-text {
-  display: flex;
   flex-direction: column;
   line-height: 1.2;
+  display: flex;
 }
 
 .sidebar-logo-museum {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.18em;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
+  color: #fff9;
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 10px;
+  font-weight: 500;
 }
 
 .sidebar-logo-brawijaya {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  color: #ffffff;
+  color: #fff;
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .sidebar-nav {
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  padding: 8px 12px;
+  flex: 1;
   gap: 2px;
+  padding: 8px 12px;
+  display: flex;
 }
 
 .sidebar-nav-item {
-  display: flex;
+  letter-spacing: .02em;
+  color: #ffffffb3;
+  border-radius: 8px;
   align-items: center;
   gap: 12px;
   padding: 11px 14px;
-  border-radius: 8px;
-  font-family: 'EB Garamond', Georgia, serif;
+  font-family: EB Garamond, Georgia, serif;
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color .2s, color .2s;
+  display: flex;
 }
 
 .sidebar-nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  color: #fff;
+  background-color: #ffffff14;
 }
 
 .sidebar-nav-item.active {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  color: #fff;
+  background-color: #ffffff26;
   font-weight: 600;
 }
 
 .sidebar-nav-icon {
-  display: flex;
+  opacity: .85;
   align-items: center;
-  opacity: 0.85;
+  display: flex;
 }
 
 .sidebar-nav-item.active .sidebar-nav-icon {
@@ -451,35 +428,33 @@ body {
 }
 
 .sidebar-footer {
+  border-top: 1px solid #ffffff1a;
   padding: 16px 12px 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-logout {
-  display: flex;
+  color: #fff9;
+  border-radius: 8px;
   align-items: center;
   gap: 12px;
   padding: 11px 14px;
-  border-radius: 8px;
-  font-family: 'EB Garamond', Georgia, serif;
+  font-family: EB Garamond, Georgia, serif;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color .2s, color .2s;
+  display: flex;
 }
 
 .sidebar-logout:hover {
-  background-color: rgba(255, 100, 100, 0.1);
   color: #ff8a8a;
+  background-color: #ff64641a;
 }
 
-/* ADMIN PAGE */
-
 .admin-page {
-  display: flex;
   flex-direction: column;
   gap: 32px;
+  display: flex;
 }
 
 .admin-page-header {
@@ -488,1449 +463,556 @@ body {
 }
 
 .admin-page-title {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: .04em;
   color: var(--text-dark);
   margin-bottom: 6px;
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .admin-page-subtitle {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 14px;
   color: var(--text-gray);
+  font-family: EB Garamond, Georgia, serif;
+  font-size: 14px;
 }
 
 .admin-page-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 80px 40px;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 12px;
   border: 1.5px dashed var(--border-light);
   color: var(--text-gray);
-  font-family: 'EB Garamond', Georgia, serif;
+  background-color: #ffffff80;
+  border-radius: 12px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 80px 40px;
+  font-family: EB Garamond, Georgia, serif;
   font-size: 15px;
+  display: flex;
 }
 
 .placeholder-icon {
   font-size: 48px;
 }
 
+/*# sourceMappingURL=src_app_globals_css_1igg3k2._.single.css.map*/
 
+/* =========================================================
+   LOGIN & REGISTER FORM STYLES (MATCHING LoginForm & RegisterForm)
+   ========================================================= */
 
-/* 01. DESIGN TOKENS */
-
-:root {
-  --museum-green: #2C4A2C;
-  --museum-green-dark: #1E351F;
-  --museum-green-soft: #EEF2EC;
-
-  --museum-cream: #F5F0E8;
-  --museum-cream-soft: #FAF8F3;
-
-  --museum-gold: #C9A84C;
-  --museum-gold-soft: #F5EED8;
-
-  --museum-text: #1A1A1A;
-  --museum-text-soft: #5F625E;
-  --museum-muted: #858781;
-
-  --museum-border: #E5E0D6;
-  --museum-border-soft: #EEEAE1;
-
-  --museum-shadow-sm:
-    0 2px 8px rgba(31, 42, 35, 0.04);
-
-  --museum-shadow:
-    0 8px 28px rgba(31, 42, 35, 0.07);
-
-  --museum-shadow-lg:
-    0 18px 50px rgba(31, 42, 35, 0.10);
-
-  --museum-radius: 12px;
-  --museum-radius-lg: 16px;
-
-  --museum-ease:
-    cubic-bezier(0.22, 1, 0.36, 1);
+.login-form-wrapper {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
 }
 
-
-/* ============================================================
-   02. GLOBAL REFINEMENT
-   ============================================================ */
-
-html {
-  scroll-behavior: smooth;
+.badge-wrapper {
+  margin-bottom: 20px;
 }
 
-body {
-  background:
-    linear-gradient(
-      180deg,
-      #F5F0E8 0%,
-      #F2EEE6 100%
-    );
-
-  color: var(--museum-text);
-}
-
-
-/* ============================================================
-   03. ADMIN BACKGROUND
-   ============================================================ */
-
-.admin-layout {
-  background:
-    radial-gradient(
-      circle at top right,
-      rgba(201, 168, 76, 0.035),
-      transparent 32%
-    ),
-    linear-gradient(
-      180deg,
-      #F4F0E8 0%,
-      #EFEAE1 100%
-    );
-}
-
-
-/* ============================================================
-   04. MAIN CONTENT
-   ============================================================ */
-
-.admin-main {
-  scroll-behavior: smooth;
-}
-
-.admin-main::-webkit-scrollbar {
-  width: 7px;
-}
-
-.admin-main::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.admin-main::-webkit-scrollbar-thumb {
-  background: rgba(44, 74, 44, 0.16);
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
   border-radius: 999px;
-}
-
-.admin-main::-webkit-scrollbar-thumb:hover {
-  background: rgba(44, 74, 44, 0.28);
-}
-
-
-/* ============================================================
-   05. SIDEBAR PREMIUM
-   ============================================================ */
-
-.sidebar {
-  position: relative;
-
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  background:
-    linear-gradient(
-      180deg,
-      #2C4A2C 0%,
-      #263F27 55%,
-      #223922 100%
-    );
-
-  box-shadow:
-    5px 0 28px rgba(17, 31, 20, 0.13);
-
-  z-index: 20;
-
-  transition:
-    box-shadow 350ms ease;
-}
-
-
-/* subtle decorative line */
-
-.sidebar::after {
-  content: "";
-
-  position: absolute;
-
-  top: 0;
-  right: 0;
-
-  width: 1px;
-  height: 100%;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(201, 168, 76, 0.35),
-      rgba(255, 255, 255, 0.04) 40%,
-      rgba(201, 168, 76, 0.18)
-    );
-
-  pointer-events: none;
-}
-
-
-/* ============================================================
-   06. SIDEBAR LOGO
-   ============================================================ */
-
-.sidebar-logo {
-  padding-top: 2px;
-
-  transition:
-    transform 300ms var(--museum-ease);
-}
-
-.sidebar-logo:hover {
-  transform: translateX(2px);
-}
-
-.sidebar-logo-icon {
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,0.14),
-      rgba(255,255,255,0.06)
-    );
-
-  box-shadow:
-    0 5px 15px rgba(0,0,0,0.08);
-
-  transition:
-    transform 350ms var(--museum-ease),
-    border-color 250ms ease,
-    box-shadow 350ms ease;
-}
-
-.sidebar-logo:hover .sidebar-logo-icon {
-  transform: rotate(-2deg) scale(1.04);
-
-  border-color:
-    rgba(201, 168, 76, 0.8);
-
-  box-shadow:
-    0 7px 20px rgba(0,0,0,0.14);
-}
-
-
-/* ============================================================
-   07. SIDEBAR MENU
-   ============================================================ */
-
-.sidebar-nav {
-  flex-grow: 1;
-  gap: 4px;
-}
-
-
-/* menu item */
-
-.sidebar-nav-item {
-  position: relative;
-
-  border: 1px solid transparent;
-
-  transition:
-    background-color 250ms ease,
-    color 250ms ease,
-    transform 250ms var(--museum-ease),
-    border-color 250ms ease,
-    padding-left 250ms var(--museum-ease);
-}
-
-
-/* active indicator */
-
-.sidebar-nav-item::before {
-  content: "";
-
-  position: absolute;
-
-  left: 0;
-  top: 50%;
-
-  width: 3px;
-  height: 0;
-
-  border-radius:
-    0 4px 4px 0;
-
-  background: var(--museum-gold);
-
-  transform:
-    translateY(-50%);
-
-  transition:
-    height 250ms var(--museum-ease);
-}
-
-
-/* hover */
-
-.sidebar-nav-item:hover {
-  background:
-    rgba(255,255,255,0.075);
-
-  border-color:
-    rgba(255,255,255,0.045);
-
-  transform:
-    translateX(3px);
-
-  padding-left: 17px;
-}
-
-
-/* active */
-
-.sidebar-nav-item.active {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255,255,255,0.15),
-      rgba(255,255,255,0.08)
-    );
-
-  border-color:
-    rgba(255,255,255,0.06);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.035);
-}
-
-.sidebar-nav-item.active::before {
-  height: 48%;
-}
-
-
-/* icon */
-
-.sidebar-nav-icon {
-  transition:
-    transform 250ms var(--museum-ease),
-    color 250ms ease;
-}
-
-.sidebar-nav-item:hover .sidebar-nav-icon {
-  transform: scale(1.06);
-}
-
-.sidebar-nav-item.active .sidebar-nav-icon {
-  filter:
-    drop-shadow(
-      0 2px 4px rgba(201,168,76,0.15)
-    );
-}
-
-
-/* ============================================================
-   08. SIDEBAR FOOTER
-   ============================================================ */
-
-.sidebar-footer {
-  border-top-color:
-    rgba(255,255,255,0.08);
-}
-
-.sidebar-logout {
-  transition:
-    background-color 250ms ease,
-    color 250ms ease,
-    transform 250ms var(--museum-ease);
-}
-
-.sidebar-logout:hover {
-  transform:
-    translateX(3px);
-
-  background:
-    rgba(255,255,255,0.055);
-}
-
-
-/* ============================================================
-   09. PAGE HEADER
-   ============================================================ */
-
-.admin-page-header {
-  position: relative;
-
-  padding-bottom: 22px;
-
-  border-bottom:
-    1px solid var(--museum-border);
-}
-
-
-/* elegant accent line */
-
-.admin-page-header::after {
-  content: "";
-
-  position: absolute;
-
-  left: 0;
-  bottom: -1px;
-
-  width: 46px;
-  height: 2px;
-
-  background:
-    var(--museum-gold);
-
-  border-radius:
-    999px;
-}
-
-
-/* title */
-
-.admin-page-title {
-  color:
-    var(--museum-text);
-
-  letter-spacing:
-    0.025em;
-}
-
-
-/* subtitle */
-
-.admin-page-subtitle {
-  color:
-    var(--museum-text-soft);
-
-  line-height:
-    1.65;
-}
-
-
-/* ============================================================
-   10. TAILWIND CARD REFINEMENT
-   ============================================================ */
-
-/*
-   Hanya mempengaruhi card putih yang memang sudah ada.
-*/
-
-main .bg-white.rounded-xl {
-  border-color:
-    var(--museum-border-soft);
-
-  box-shadow:
-    var(--museum-shadow-sm);
-
-  transition:
-    transform 320ms var(--museum-ease),
-    box-shadow 320ms ease,
-    border-color 250ms ease;
-}
-
-
-/*
-   Hover card
-*/
-
-main .bg-white.rounded-xl:hover {
-  border-color:
-    #DDD7CA;
-
-  box-shadow:
-    var(--museum-shadow);
-
-  transform:
-    translateY(-2px);
-}
-
-
-/*
-   Jangan menaikkan card ketika berada di modal.
-*/
-
-.fixed .bg-white.rounded-xl:hover {
-  transform: none;
-}
-
-
-/* ============================================================
-   11. STATISTIC CARDS
-   ============================================================ */
-
-main .bg-white.rounded-xl.shadow-sm {
-  box-shadow:
-    0 2px 10px rgba(31,42,35,0.045);
-}
-
-main .bg-white.rounded-xl.shadow-sm:hover {
-  box-shadow:
-    0 12px 30px rgba(31,42,35,0.075);
-}
-
-
-/* ============================================================
-   12. ICON BOX
-   ============================================================ */
-
-main .rounded-lg {
-  transition:
-    transform 250ms var(--museum-ease),
-    box-shadow 250ms ease;
-}
-
-main .bg-white.rounded-xl:hover .rounded-lg {
-  transform:
-    scale(1.035);
-}
-
-
-/* ============================================================
-   13. SEARCH INPUT
-   ============================================================ */
-
-main input[type="text"],
-main input[type="search"],
-main select,
-main textarea {
-  transition:
-    border-color 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease,
-    transform 220ms var(--museum-ease);
-}
-
-
-/* focus */
-
-main input[type="text"]:focus,
-main input[type="search"]:focus,
-main select:focus,
-main textarea:focus {
-  border-color:
-    rgba(44,74,44,0.45);
-
-  background-color:
-    #FFFFFF;
-
-  box-shadow:
-    0 0 0 3px rgba(44,74,44,0.055);
-
-  transform:
-    translateY(-1px);
-}
-
-
-/* ============================================================
-   14. BUTTON SYSTEM
-   ============================================================ */
-
-main button {
-  transition:
-    transform 180ms var(--museum-ease),
-    box-shadow 220ms ease,
-    background-color 220ms ease,
-    border-color 220ms ease,
-    color 220ms ease;
-}
-
-main button:hover {
-  transform:
-    translateY(-1px);
-}
-
-main button:active {
-  transform:
-    scale(0.975);
-}
-
-
-/*
-   Primary dark green buttons
-*/
-
-main button.bg-\[\#1C2D24\],
-main button.bg-\[\#2D3E33\] {
-  box-shadow:
-    0 4px 12px rgba(28,45,36,0.10);
-}
-
-main button.bg-\[\#1C2D24\]:hover,
-main button.bg-\[\#2D3E33\]:hover {
-  box-shadow:
-    0 8px 20px rgba(28,45,36,0.17);
-}
-
-
-/* ============================================================
-   15. TABLE
-   ============================================================ */
-
-main table {
-  border-spacing: 0;
-}
-
-
-/* table header */
-
-main thead tr {
-  background:
-    #F8F6F1;
-}
-
-
-/* table cells */
-
-main tbody tr {
-  transition:
-    background-color 200ms ease,
-    transform 200ms var(--museum-ease);
-}
-
-
-/* hover row */
-
-main tbody tr:hover {
-  background:
-    #FAF9F5;
-}
-
-
-/* row divider */
-
-main tbody tr td {
-  border-bottom-color:
-    #EEEAE2;
-}
-
-
-/* ============================================================
-   16. TABLE ACTION BUTTON
-   ============================================================ */
-
-main tbody button {
-  transition:
-    transform 180ms var(--museum-ease),
-    background-color 180ms ease,
-    color 180ms ease;
-}
-
-main tbody button:hover {
-  transform:
-    translateY(-1px) scale(1.02);
-}
-
-
-/* ============================================================
-   17. STATUS BADGES
-   ============================================================ */
-
-main span.rounded-full {
-  transition:
-    transform 180ms var(--museum-ease),
-    box-shadow 180ms ease;
-}
-
-main span.rounded-full:hover {
-  transform:
-    scale(1.025);
-}
-
-
-/* ============================================================
-   18. PAGINATION
-   ============================================================ */
-
-main nav button,
-main button[aria-label*="page"],
-main button[aria-label*="halaman"] {
-  transition:
-    transform 180ms var(--museum-ease),
-    background-color 180ms ease,
-    border-color 180ms ease;
-}
-
-main nav button:hover {
-  transform:
-    translateY(-1px);
-}
-
-
-/* ============================================================
-   19. EMPTY STATE
-   ============================================================ */
-
-.admin-page-placeholder {
-  position: relative;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,0.72),
-      rgba(250,248,243,0.72)
-    );
-
-  border-color:
-    var(--museum-border);
-
-  box-shadow:
-    var(--museum-shadow-sm);
-
-  transition:
-    transform 300ms var(--museum-ease),
-    box-shadow 300ms ease;
-}
-
-.admin-page-placeholder:hover {
-  transform:
-    translateY(-2px);
-
-  box-shadow:
-    var(--museum-shadow);
-}
-
-.placeholder-icon {
-  opacity:
-    0.75;
-
-  filter:
-    grayscale(15%);
-}
-
-
-/* ============================================================
-   20. MODAL
-   ============================================================ */
-
-
-/*
-   Overlay
-*/
-
-.fixed.inset-0.z-50 {
-  backdrop-filter:
-    blur(3px);
-
-  -webkit-backdrop-filter:
-    blur(3px);
-}
-
-
-/*
-   Modal panel
-*/
-
-.fixed.inset-0.z-50 > div {
-  box-shadow:
-    0 25px 70px rgba(15,25,18,0.18);
-
-  border-color:
-    rgba(44,74,44,0.10);
-}
-
-
-/*
-   modal input
-*/
-
-.fixed.inset-0.z-50 input,
-.fixed.inset-0.z-50 textarea,
-.fixed.inset-0.z-50 select {
-  transition:
-    border-color 220ms ease,
-    box-shadow 220ms ease,
-    background-color 220ms ease;
-}
-
-.fixed.inset-0.z-50 input:focus,
-.fixed.inset-0.z-50 textarea:focus,
-.fixed.inset-0.z-50 select:focus {
-  border-color:
-    rgba(44,74,44,0.45);
-
-  box-shadow:
-    0 0 0 3px rgba(44,74,44,0.06);
-}
-
-
-/* ============================================================
-   21. MODAL BUTTONS
-   ============================================================ */
-
-.fixed.inset-0.z-50 button {
-  transition:
-    transform 180ms var(--museum-ease),
-    box-shadow 220ms ease,
-    background-color 220ms ease;
-}
-
-.fixed.inset-0.z-50 button:hover {
-  transform:
-    translateY(-1px);
-}
-
-.fixed.inset-0.z-50 button:active {
-  transform:
-    scale(0.975);
-}
-
-
-/* ============================================================
-   22. LOGIN PAGE PREMIUM
-   ============================================================ */
-
-.login-container {
-  background:
-    var(--museum-cream);
-}
-
-
-/*
-   image
-*/
-
-.login-left img {
-  transition:
-    transform 1.2s var(--museum-ease),
-    filter 700ms ease;
-}
-
-.login-left:hover img {
-  transform:
-    scale(1.015);
-}
-
-
-/*
-   image overlay
-*/
-
-.login-left-overlay {
-  background:
-    linear-gradient(
-      to top,
-      rgba(0,0,0,0.72) 0%,
-      rgba(0,0,0,0.25) 42%,
-      rgba(0,0,0,0.04) 100%
-    );
-}
-
-
-/*
-   login panel
-*/
-
-.login-right {
-  box-shadow:
-    -10px 0 40px rgba(31,42,35,0.05);
-}
-
-
-/*
-   logo
-*/
-
-.museum-logo {
-  transition:
-    transform 350ms var(--museum-ease),
-    box-shadow 350ms ease;
-}
-
-.museum-logo:hover {
-  transform:
-    translateY(-2px) scale(1.025);
-
-  box-shadow:
-    0 10px 28px rgba(44,74,44,0.25);
-}
-
-
-/*
-   login title
-*/
-
-.login-title {
-  letter-spacing:
-    0.14em;
-}
-
-
-/*
-   login form
-*/
-
-.login-form {
-  max-width:
-    380px;
-}
-
-
-/*
-   input
-*/
-
-.form-input {
-  border-color:
-    rgba(216,208,192,0.7);
-
-  background:
-    #F1EDE4;
-
-  transition:
-    border-color 220ms ease,
-    background-color 220ms ease,
-    box-shadow 220ms ease,
-    transform 220ms var(--museum-ease);
-}
-
-.form-input:hover {
-  background:
-    #F4F1EA;
-}
-
-.form-input:focus {
-  background:
-    #FFFFFF;
-
-  border-color:
-    var(--museum-green);
-
-  box-shadow:
-    0 0 0 3px rgba(44,74,44,0.055);
-
-  transform:
-    translateY(-1px);
-}
-
-
-/*
-   login button
-*/
-
-.btn-masuk {
-  position: relative;
-  overflow: hidden;
-
-  background:
-    linear-gradient(
-      135deg,
-      #2C4A2C,
-      #233D24
-    );
-}
-
-.btn-masuk:hover {
-  transform:
-    translateY(-2px);
-
-  box-shadow:
-    0 9px 24px rgba(44,74,44,0.25);
-}
-
-
-/* ============================================================
-   23. LOGIN SECURITY
-   ============================================================ */
-
-.security-notice {
-  opacity:
-    0.85;
-}
-
-
-/* ============================================================
-   24. TEXT REFINEMENT
-   ============================================================ */
-
-.admin-page h1,
-.admin-page h2,
-.admin-page h3 {
-  color:
-    var(--museum-text);
-}
-
-
-/* ============================================================
-   25. LINKS
-   ============================================================ */
-
-main a {
-  transition:
-    color 180ms ease,
-    opacity 180ms ease;
-}
-
-main a:hover {
-  opacity:
-    0.82;
-}
-
-
-/* ============================================================
-   26. IMAGE / COLLECTION
-   ============================================================ */
-
-main img {
-  transition:
-    transform 450ms var(--museum-ease),
-    filter 450ms ease;
-}
-
-
-/*
-   hanya image yang berada di card
-*/
-
-main .rounded-xl img:hover {
-  transform:
-    scale(1.018);
-}
-
-
-/* ============================================================
-   27. DASHBOARD INLINE STYLE CARD
-   ============================================================ */
-
-
-/*
-   Dashboard menggunakan inline style.
-   Selector ini hanya mengincar div card dengan struktur existing.
-*/
-
-main > div > div[style*="background-color: rgb(255, 255, 255)"] {
-  transition:
-    transform 300ms var(--museum-ease),
-    box-shadow 300ms ease;
-}
-
-
-/*
-   Jangan terlalu kuat karena dashboard memang
-   menggunakan desain compact.
-*/
-
-main > div > div[style*="background-color: rgb(255, 255, 255)"]:hover {
-  transform:
-    translateY(-2px);
-
-  box-shadow:
-    0 10px 28px rgba(31,42,35,0.07);
-}
-
-
-/* ============================================================
-   28. DASHBOARD NOTIFICATION
-   ============================================================ */
-
-
-/*
-   tombol notifikasi
-*/
-
-main button[style*="border-radius: 50%"] {
-  transition:
-    transform 180ms var(--museum-ease),
-    box-shadow 220ms ease;
-}
-
-main button[style*="border-radius: 50%"]:hover {
-  transform:
-    translateY(-1px) scale(1.025);
-
-  box-shadow:
-    0 5px 14px rgba(31,42,35,0.08);
-}
-
-
-/* ============================================================
-   29. NOTIFICATION DOT
-   ============================================================ */
-
-main span[style*="background-color: rgb(239, 68, 68)"] {
-  animation:
-    museumNotificationPulse 1.8s ease-in-out infinite;
-}
-
-@keyframes museumNotificationPulse {
-  0%,
-  100% {
-    transform:
-      scale(1);
-  }
-
-  50% {
-    transform:
-      scale(1.35);
-  }
-}
-
-
-/* ============================================================
-   30. DASHBOARD CHART
-   ============================================================ */
-
-main div[style*="height: 160px"] > div {
-  transition:
-    opacity 250ms ease,
-    transform 300ms var(--museum-ease);
-}
-
-main div[style*="height: 160px"] > div:hover {
-  opacity:
-    0.86;
-
-  transform:
-    translateY(-3px);
-}
-
-
-/* ============================================================
-   31. CARD NUMBER
-   ============================================================ */
-
-main .text-lg.font-bold,
-main .text-xl.font-bold,
-main .text-2xl.font-bold {
-  letter-spacing:
-    -0.02em;
-}
-
-
-/* ============================================================
-   32. GOLD ACCENT
-   ============================================================ */
-
-.museum-gold {
-  color:
-    var(--museum-gold);
-}
-
-.museum-gold-bg {
-  background:
-    var(--museum-gold-soft);
-}
-
-
-/* ============================================================
-   33. FOCUS ACCESSIBILITY
-   ============================================================ */
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline:
-    2px solid rgba(201,168,76,0.7);
-
-  outline-offset:
-    2px;
-}
-
-
-/* ============================================================
-   34. SELECTION
-   ============================================================ */
-
-::selection {
-  background:
-    rgba(201,168,76,0.24);
-
-  color:
-    var(--museum-text);
-}
-
-
-/* ============================================================
-   35. RESPONSIVE
-   ============================================================ */
-
-@media (max-width: 900px) {
-
-  .sidebar {
-    box-shadow:
-      3px 0 18px rgba(17,31,20,0.10);
-  }
-
-  main .bg-white.rounded-xl:hover {
-    transform:
-      translateY(-1px);
-  }
-
-}
-
-
-@media (max-width: 640px) {
-
-  .admin-page {
-    gap:
-      22px;
-  }
-
-  .admin-page-title {
-    font-size:
-      24px;
-  }
-
-  .admin-page-header {
-    padding-bottom:
-      16px;
-  }
-
-  .login-right {
-    box-shadow:
-      none;
-  }
-
-}
-
-
-/* ============================================================
-   36. REDUCED MOTION
-   ============================================================ */
-
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration:
-      0.01ms !important;
-
-    animation-iteration-count:
-      1 !important;
-
-    transition-duration:
-      0.01ms !important;
-
-    scroll-behavior:
-      auto !important;
-  }
-
-}
-
-/* =========================================
-   FIXED SIDEBAR + RESPONSIVE ADMIN LAYOUT
-   ========================================= */
-
-.admin-layout {
-  display: flex;
-  width: 100%;
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
-  background: var(--cream);
-}
-
-.admin-sidebar-shell {
-  position: fixed;
-  inset: 0 auto 0 0;
-  z-index: 100;
-  width: 216px;
-  height: 100dvh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
+  background: #E8E2D5;
+  color: var(--dark-green);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   background: var(--dark-green);
-  transition: transform 280ms ease;
 }
 
-.admin-sidebar-shell .sidebar {
-  width: 100%;
-  min-width: 0;
-  min-height: 100%;
-  height: 100%;
+.heading-group {
+  margin-bottom: 24px;
 }
 
-.admin-content {
+.heading-group .title {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+
+.heading-group .subtitle {
+  font-size: 13px;
+  color: var(--text-gray);
+  line-height: 1.5;
+}
+
+.field-group {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  width: calc(100% - 216px);
-  min-width: 0;
-  height: 100dvh;
-  margin-left: 216px;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dark);
+  letter-spacing: 0.02em;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  font-size: 11px;
+  color: var(--dark-green);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  background: #FCFBF8;
+  font-size: 13px;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--dark-green);
+  box-shadow: 0 0 0 3px rgba(44, 74, 44, 0.12);
+}
+
+.password-input {
+  padding-right: 42px;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-gray);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.toggle-password-btn:hover {
+  color: var(--dark-green);
+}
+
+.remember-row {
+  margin: 4px 0 16px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox-input {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--dark-green);
+  cursor: pointer;
+}
+
+.checkbox-text {
+  font-size: 12px;
+  color: var(--text-gray);
+}
+
+.submit-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 8px;
+  background: var(--dark-green);
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 2px 10px rgba(44, 74, 44, 0.25);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: var(--dark-green-hover);
+  transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.login-footer {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.copyright {
+  font-size: 11px;
+  color: #999;
+}
+
+
+/* =========================================================
+   LOGIN SCREEN EXACT MATCH (DESAIN SESUAI SCREENSHOT USER)
+   ========================================================= */
+
+.login-page-bg {
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #F6F3EC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+.login-card-container {
+  width: 100%;
+  max-width: 1050px;
+  min-height: 600px;
+  background-color: #F8F5EE;
+  border-radius: 28px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
+  display: flex;
+  overflow: hidden;
+  padding: 16px;
+  position: relative;
+  border: 1px solid rgba(220, 215, 203, 0.5);
+}
+
+/* KIRI: Foto Museum */
+.login-card-left {
+  flex: 1.05;
+  position: relative;
+  min-height: 560px;
+  border-radius: 20px;
   overflow: hidden;
 }
 
-.admin-main {
-  flex: 1;
+.login-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(15, 25, 18, 0.85) 0%,
+    rgba(15, 25, 18, 0.25) 35%,
+    rgba(0, 0, 0, 0.02) 100%
+  );
+}
+
+.login-image-caption {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 10;
+}
+
+.caption-tag {
+  color: #D3C28E;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin: 0 0 4px 0;
+  font-family: inherit;
+}
+
+.caption-title {
+  color: #FFFFFF;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+  font-family: 'EB Garamond', Georgia, serif;
+}
+
+/* KANAN: Form Login */
+.login-card-right {
+  flex: 1.15;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 60px;
+  position: relative;
+}
+
+.version-number {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  font-size: 10.5px;
+  color: #A39E93;
+  letter-spacing: 0.04em;
+  font-family: inherit;
+}
+
+.login-content-box {
   width: 100%;
-  min-width: 0;
-  min-height: 0;
-  padding: 24px;
-  overflow-y: auto;
-  overflow-x: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Tombol menu hanya terlihat di layar kecil */
-.mobile-header {
-  display: none;
+/* Logo Lingkaran Hijau */
+.brand-logo-circle {
+  width: 62px;
+  height: 62px;
+  background-color: #2D4330;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 14px rgba(45, 67, 48, 0.25);
 }
 
-.sidebar-overlay {
-  display: none;
+.logo-icon-svg {
+  display: block;
 }
 
-/* Tabel lebar boleh di-scroll tanpa menggeser sidebar */
-.admin-main table {
-  max-width: 100%;
+/* Headings */
+.login-heading-title {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #1A251D;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 6px 0;
+  text-align: center;
 }
 
-/* =========================================
-   TABLET DAN HP
-   ========================================= */
+.login-heading-subtitle {
+  font-size: 11.5px;
+  color: #7A7872;
+  margin: 0 0 28px 0;
+  text-align: center;
+}
 
-@media (max-width: 900px) {
-  .admin-sidebar-shell {
-    width: 260px;
-    max-width: 85vw;
-    transform: translateX(-100%);
-    visibility: hidden;
-    transition:
-      transform 280ms ease,
-      visibility 280ms ease;
-  }
+.login-error-alert {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #991B1B;
+  font-size: 11.5px;
+  margin-bottom: 16px;
+  text-align: center;
+}
 
-  .admin-sidebar-shell.sidebar-open {
-    transform: translateX(0);
-    visibility: visible;
-  }
+/* Form Styles */
+.form-clean {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-  .admin-content {
-    width: 100%;
-    margin-left: 0;
-  }
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
 
-  .mobile-header {
-    position: relative;
-    z-index: 50;
-    display: flex;
-    flex: 0 0 64px;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    padding: 0 18px;
-    background: #FCFBF8;
-    border-bottom: 1px solid var(--border-light);
-    box-shadow: 0 2px 8px rgba(31, 42, 35, 0.04);
-  }
+.field-uppercase-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #2A362C;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
 
-  .mobile-menu-button {
-    display: inline-flex;
-    flex: 0 0 42px;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border: 1px solid var(--border-light);
-    border-radius: 10px;
-    background: #fff;
-    color: var(--dark-green);
-    cursor: pointer;
-  }
+.clean-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
 
-  .mobile-brand {
-    display: flex;
+.clean-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background-color: #FFFFFF;
+  border: 1px solid #D8D2C4;
+  font-size: 12.5px;
+  color: #222222;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.clean-input::placeholder {
+  color: #B5B0A4;
+  font-size: 12px;
+}
+
+.clean-input:focus {
+  border-color: #2D4330;
+  box-shadow: 0 0 0 3px rgba(45, 67, 48, 0.1);
+}
+
+.password-clean-input {
+  padding-right: 40px;
+}
+
+.password-eye-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #8C887E;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.password-eye-btn:hover {
+  color: #2D4330;
+}
+
+/* Remember Me & Lupa Password */
+.form-clean-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  margin-bottom: 22px;
+}
+
+.remember-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+
+.remember-native-checkbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid #BBB5A8;
+  accent-color: #2D4330;
+  cursor: pointer;
+}
+
+.remember-text-label {
+  font-size: 11.5px;
+  color: #4D4B46;
+}
+
+.forgot-password-link {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #2A362C;
+  text-decoration: none;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+/* Tombol Masuk Hijau Tua Elegan */
+.btn-masuk-darkgreen {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 10px;
+  background-color: #2D4330;
+  color: #FFFFFF;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px rgba(45, 67, 48, 0.25);
+}
+
+.btn-masuk-darkgreen:hover:not(:disabled) {
+  background-color: #223525;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(45, 67, 48, 0.32);
+}
+
+.btn-masuk-darkgreen:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Footer Notice */
+.login-notice-text {
+  font-size: 10px;
+  color: #9E998E;
+  text-align: center;
+  line-height: 1.5;
+  margin-top: 36px;
+  padding: 0 10px;
+}
+
+/* Responsif Mobile & Tablet */
+@media (max-width: 860px) {
+  .login-card-container {
     flex-direction: column;
-    gap: 1px;
-    line-height: 1.1;
+    max-width: 460px;
+    padding: 14px;
   }
 
-  .mobile-brand span {
-    color: var(--text-gray);
-    font-size: 10px;
-    letter-spacing: 0.18em;
+  .login-card-left {
+    min-height: 240px;
+    flex: none;
   }
 
-  .mobile-brand strong {
-    color: var(--dark-green);
-    font-size: 15px;
-    letter-spacing: 0.06em;
-  }
-
-  .sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 90;
-    display: block;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    background: rgba(12, 20, 14, 0.48);
-    cursor: pointer;
-    animation: sidebarOverlayIn 200ms ease;
-  }
-
-  .admin-main {
-    padding: 20px;
-  }
-}
-
-/* =========================================
-   HP KECIL
-   ========================================= */
-
-@media (max-width: 600px) {
-  .mobile-header {
-    flex-basis: 58px;
-    padding: 0 12px;
-  }
-
-  .mobile-menu-button {
-    width: 40px;
-    height: 40px;
-    flex-basis: 40px;
-  }
-
-  .admin-main {
-    padding: 16px 12px;
-  }
-
-  .admin-page {
-    gap: 22px;
-    min-width: 0;
-  }
-
-  .admin-page-header {
-    padding-bottom: 16px;
-  }
-
-  .admin-page-title {
-    font-size: 23px;
-  }
-
-  /* Grid statistik mengikuti lebar layar */
-  .admin-main .grid {
-    min-width: 0;
-  }
-
-  /* Tabel tetap bisa di-scroll secara horizontal */
-  .admin-main table {
-    min-width: 600px;
-  }
-}
-
-@keyframes sidebarOverlayIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Hormati preferensi pengguna */
-@media (prefers-reduced-motion: reduce) {
-  .admin-sidebar-shell,
-  .sidebar-overlay {
-    transition: none;
-    animation: none;
+  .login-card-right {
+    padding: 30px 16px 20px;
   }
 }
