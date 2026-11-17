@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { tiketApi } from "@/lib/api";
 import TicketStatsSection from "./components/TicketStatsSection";
 import TicketCategoriesSection from "./components/TicketCategoriesSection";
@@ -22,6 +23,8 @@ export default function ManajemenTiketPage() {
   const [editCategory, setEditCategory] = useState<TicketCategory | null>(null);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [checkInSaving, setCheckInSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const bookingsPerPage = 5;
 
   const [newCat, setNewCat] = useState({ badge: "", title: "", price: 0, kuota: 100 });
@@ -119,15 +122,23 @@ export default function ManajemenTiketPage() {
   };
 
   // Check-in
-  const handleConfirmCheckIn = async (id: string) => {
+  const handleConfirmCheckIn = async (booking: TicketBooking) => {
+    if (booking.status !== "LUNAS" || booking.checked_in || checkInSaving) return;
+
+    setCheckInSaving(true);
+    setSuccessMessage("");
     try {
-      // Pastikan status LUNAS dulu
-      await tiketApi.updateBookingStatus(id, "LUNAS");
-      await tiketApi.checkIn(id);
+      const response = await tiketApi.checkIn(booking.id);
+      setBookings((current) =>
+        current.map((item) => item.id === booking.id ? { ...item, ...response.data } : item)
+      );
       await fetchData();
       setScanModalBooking(null);
+      setSuccessMessage(`Check-in tiket ${booking.id} berhasil dikonfirmasi.`);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Gagal check-in");
+    } finally {
+      setCheckInSaving(false);
     }
   };
 
@@ -137,11 +148,16 @@ export default function ManajemenTiketPage() {
       {/* Error Banner */}
       {error && (
         <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fca5a5", color: "#dc2626", padding: "10px 16px", borderRadius: "8px", marginBottom: "16px", fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
-          <span>⚠️ {error} — Pastikan backend berjalan di <code>http://localhost:3001</code></span>
+          <span>⚠️ {error} — Pastikan URL backend sudah dikonfigurasi.</span>
           <button onClick={fetchData} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontWeight: "700" }}>Coba Lagi</button>
         </div>
       )}
 
+      {successMessage && (
+        <div role="status" style={{ backgroundColor: "#ECFDF5", border: "1px solid #A7F3D0", color: "#047857", padding: "10px 16px", borderRadius: "8px", marginBottom: "16px", fontSize: "12px", fontWeight: "700" }}>
+          {successMessage}
+        </div>
+      )}
 
 
       <TicketStatsSection loading={loading} stats={stats} />
@@ -191,6 +207,7 @@ export default function ManajemenTiketPage() {
                 ["Total Biaya", `Rp ${selectedBooking.total_biaya.toLocaleString("id-ID")}`],
                 ["Status", selectedBooking.status],
                 ["Check-In", selectedBooking.checked_in ? "✅ Sudah" : "⏳ Belum"],
+                ...(selectedBooking.checked_in_at ? [["Waktu Check-In", new Date(selectedBooking.checked_in_at).toLocaleString("id-ID")]] : []),
               ].map(([label, value]) => (
                 <p key={label} style={{ margin: 0 }}><strong>{label}:</strong> {value}</p>
               ))}
@@ -206,12 +223,21 @@ export default function ManajemenTiketPage() {
           <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "12px", width: "320px", textAlign: "center", border: "1px solid #E7E5E4", fontFamily: "sans-serif" }}>
             <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 8px 0", color: "#1C1917" }}>Scan Check-In Tiket</h3>
             <p style={{ fontSize: "11px", color: "#78716C", margin: "0 0 16px 0" }}>Kode: {scanModalBooking.id}</p>
-            <div style={{ width: "120px", height: "120px", backgroundColor: "#FAFAF9", border: "2px dashed #A8A29E", borderRadius: "8px", margin: "0 auto 16px auto", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "40px" }}>🔲</div>
+            <div style={{ width: "184px", height: "184px", backgroundColor: "#FFFFFF", border: "1px solid #E7E5E4", borderRadius: "8px", margin: "0 auto 16px auto", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <QRCodeSVG value={scanModalBooking.id} size={168} level="H" marginSize={2} title={`QR Tiket ${scanModalBooking.id}`} />
+            </div>
             <p style={{ fontSize: "12px", fontWeight: "700", margin: "0 0 4px 0", color: "#1C1917" }}>{scanModalBooking.nama}</p>
             <p style={{ fontSize: "11px", color: "#78716C", margin: "0 0 12px 0" }}>{scanModalBooking.total_tiket} Tiket • {scanModalBooking.visit_date}</p>
+            {scanModalBooking.checked_in ? (
+              <p style={{ fontSize: "11px", color: "#B45309", margin: "0 0 12px 0" }}>Tiket ini sudah digunakan untuk check-in.</p>
+            ) : scanModalBooking.status !== "LUNAS" ? (
+              <p style={{ fontSize: "11px", color: "#B45309", margin: "0 0 12px 0" }}>Pembayaran belum lunas. Check-in tidak dapat dilakukan.</p>
+            ) : null}
             <div style={{ display: "flex", gap: "8px" }}>
-              <button onClick={() => handleConfirmCheckIn(scanModalBooking.id)} style={{ flex: 1, padding: "8px", backgroundColor: "#059669", color: "#FFFFFF", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "11px", fontWeight: "700" }}>✅ Konfirmasi Check-In</button>
-              <button onClick={() => setScanModalBooking(null)} style={{ flex: 1, padding: "8px", backgroundColor: "#FAFAF9", color: "#44403C", border: "1px solid #E7E5E4", borderRadius: "6px", cursor: "pointer", fontSize: "11px" }}>Batal</button>
+              <button onClick={() => handleConfirmCheckIn(scanModalBooking)} disabled={checkInSaving || scanModalBooking.status !== "LUNAS" || Boolean(scanModalBooking.checked_in)} style={{ flex: 1, padding: "8px", backgroundColor: "#059669", color: "#FFFFFF", border: "none", borderRadius: "6px", cursor: checkInSaving || scanModalBooking.status !== "LUNAS" || Boolean(scanModalBooking.checked_in) ? "not-allowed" : "pointer", fontSize: "11px", fontWeight: "700", opacity: checkInSaving || scanModalBooking.status !== "LUNAS" || Boolean(scanModalBooking.checked_in) ? 0.6 : 1 }}>
+                {checkInSaving ? "Menyimpan..." : scanModalBooking.checked_in ? "Sudah Check-In" : "✅ Konfirmasi Check-In"}
+              </button>
+              <button onClick={() => setScanModalBooking(null)} disabled={checkInSaving} style={{ flex: 1, padding: "8px", backgroundColor: "#FAFAF9", color: "#44403C", border: "1px solid #E7E5E4", borderRadius: "6px", cursor: checkInSaving ? "not-allowed" : "pointer", fontSize: "11px" }}>Batal</button>
             </div>
           </div>
         </div>

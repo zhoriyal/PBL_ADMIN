@@ -2,11 +2,17 @@ import { AUTH_TOKEN_COOKIE } from "./auth-constants";
 
 /**
  * API Client untuk Admin Next.js
- * Terhubung ke backend Express.js di http://localhost:3001
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 export const OFFLINE_MOCK_TOKEN = 'offline-mock-token';
+
+function getApiBaseUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (!baseUrl) {
+    throw new Error('NEXT_PUBLIC_API_URL belum dikonfigurasi');
+  }
+  return baseUrl.replace(/\/+$/, '');
+}
 
 export class ApiNetworkError extends Error {
   constructor(message = 'Backend tidak dapat dijangkau') {
@@ -52,7 +58,7 @@ async function request<T = any>(method: string, path: string, body?: any): Promi
 
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}${path}`, options);
+    res = await fetch(`${getApiBaseUrl()}${path}`, options);
   } catch (error) {
     if (error instanceof TypeError) {
       throw new ApiNetworkError();
@@ -128,13 +134,19 @@ export const koleksiApi = {
   delete: (id: number | string) => request('DELETE', `/koleksi/${id}`),
 };
 
+// ─── AI ──────────────────────────────────────────────────────────────────────
+export const aiApi = {
+  generateDescription: (data: { title: string; category: string }) =>
+    request<{ description: string }>('POST', '/ai/generate-description', data),
+};
+
 // ─── ULASAN ───────────────────────────────────────────────────────────────────
 export const ulasanApi = {
   getAll: (params: Record<string, any> = {}) => {
     const q = new URLSearchParams(params).toString();
     return request('GET', `/ulasan?${q}`);
   },
-  reply: (id: number | string, reply: string) => request('POST', `/ulasan/${id}/reply`, { reply }),
+  reply: (id: number | string, reply: string) => request('PUT', `/ulasan/${id}/reply`, { reply }),
   delete: (id: number | string) => request('DELETE', `/ulasan/${id}`),
 };
 

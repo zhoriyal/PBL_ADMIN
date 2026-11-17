@@ -22,6 +22,8 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 The admin routes (`/dashboard`, `/ulasan`, `/tiket`, `/pengaturan`, `/informasi`, and `/koleksi`, including their subroutes) require an authentication token. Requests without a token are redirected to `/login`; `/login` and `/register` remain public. A successful login stores the token for both the API client and the Next.js request guard, and logout clears both.
 
+The admin layout validates the token with the backend `/auth/me` endpoint and only allows `ADMIN`, `SUPERADMIN`, or `STAFF` roles. The image upload endpoint performs the same check and returns `401` when the session is missing, invalid, or not an admin session. This frontend guard complements, but does not replace, authorization on backend API routes.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
@@ -35,6 +37,25 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Folder aplikasi Next.js adalah `PBL_ADMIN/` (menggunakan App Router di `src/app`). Dari root workspace, jalankan perintah berikut; pilih atau buat project saat diminta:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```powershell
+Set-Location .\PBL_ADMIN
+npx vercel login
+npx vercel link
+```
+
+Di pengaturan project Vercel, pastikan **Root Directory** adalah `PBL_ADMIN` bila project dibuat dari root repository. Sebelum deploy, atur `NEXT_PUBLIC_API_URL` ke URL backend publik beserta `/api` (contoh `https://api.example.com/api`) dan `API_URL` ke URL backend yang sama. Tambahkan keduanya untuk environment Production di **Project Settings → Environment Variables**. Jangan masukkan kredensial backend ke `NEXT_PUBLIC_*`.
+
+Buat Vercel Blob Store di dashboard Vercel lalu hubungkan ke project ini. Integrasi tersebut menambahkan `BLOB_READ_WRITE_TOKEN` ke environment project; periksa bahwa variabel tersedia untuk Production (dan Preview bila diperlukan) sebelum menguji endpoint upload admin. Jangan menyalin token ke source control atau membagikannya di log.
+
+Deploy preview dan production:
+
+```powershell
+npx vercel
+npx vercel --prod
+```
+
+Vercel akan menampilkan URL publik project dengan akhiran `.vercel.app`. Masukkan origin tersebut tanpa path ke `CORS_ORIGINS` di backend, misalnya `https://nama-project.vercel.app`, lalu redeploy/restart backend.
+
+Project tidak memerlukan `vercel.json`; Vercel mendeteksi Next.js dari `package.json` dan konfigurasi Next. Jangan mendaftarkan domain Vercel sebagai webhook Midtrans: URL notifikasi harus menuju backend Express yang dapat dijangkau publik.

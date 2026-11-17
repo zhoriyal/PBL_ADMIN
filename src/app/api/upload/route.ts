@@ -1,9 +1,17 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
+import { isAuthenticatedAdmin } from "@/lib/server-auth";
 
 const MAX_FILE_SIZE = 4.5 * 1024 * 1024;
 
 export async function POST(request: Request) {
+  if (!(await isAuthenticatedAdmin())) {
+    return NextResponse.json(
+      { success: false, message: "Autentikasi admin diperlukan" },
+      { status: 401 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get("file");

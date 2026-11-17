@@ -76,7 +76,7 @@ export default function ReviewCenter() {
       <div className="space-y-[18px] p-4 md:p-6">
         {error && (
           <div className="flex justify-between rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
-            <span>⚠️ {error} — Pastikan backend berjalan di <code>http://localhost:3001</code></span>
+            <span>⚠️ {error} — Pastikan URL backend sudah dikonfigurasi.</span>
             <button onClick={reloadReviews} className="underline">Coba Lagi</button>
           </div>
         )}

@@ -24,4 +24,5 @@ export interface TicketBooking {
   payment_method: string;
   status: "LUNAS" | "MENUNGGU" | "BATAL";
   checked_in: number;
+  checked_in_at?: string | null;
 }

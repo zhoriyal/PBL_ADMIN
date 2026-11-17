@@ -138,7 +138,7 @@ export default function InfoCenter() {
         {/* Error */}
         {error && (
           <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700 flex justify-between">
-            <span>⚠️ {error} — Pastikan backend berjalan di <code>http://localhost:3001</code></span>
+            <span>⚠️ {error} — Pastikan URL backend sudah dikonfigurasi.</span>
             <button onClick={reloadData} className="underline">Coba Lagi</button>
           </div>
         )}

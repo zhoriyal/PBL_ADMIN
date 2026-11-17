@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, Plus, Trash2, X } from "lucide-react";
-import { koleksiApi } from "@/lib/api";
+import { aiApi, koleksiApi } from "@/lib/api";
 import CollectionStatsSection from "./components/CollectionStatsSection";
 import CollectionTableSection from "./components/CollectionTableSection";
 import type { KoleksiItem } from "./components/types";
@@ -14,7 +14,7 @@ interface Stats {
   disimpan: number;
 }
 
-const emptyForm = { nama: "", sub_deskripsi: "", kategori: "Kendaraan", tahun: "", lokasi: "", status: "DIPAMERKAN" as KoleksiItem["status"], image_url: "" };
+const emptyForm = { nama: "", sub_deskripsi: "", deskripsi_lengkap: "", kategori: "Kendaraan", tahun: "", lokasi: "", status: "DIPAMERKAN" as KoleksiItem["status"], image_url: "" };
 
 export default function KatalogKoleksiPage() {
   const [koleksiList, setKoleksiList] = useState<KoleksiItem[]>([]);
@@ -30,6 +30,7 @@ export default function KatalogKoleksiPage() {
   const [formData, setFormData] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
   const itemsPerPage = 5;
 
   // ─── Upload Foto Koleksi (Vercel Blob / Storage) ─────────────────────────
@@ -140,6 +141,29 @@ export default function KatalogKoleksiPage() {
     }
   };
 
+  const handleGenerateDescription = async (isEdit: boolean) => {
+    const title = (isEdit ? editItem?.nama : formData.nama)?.trim() ?? "";
+    const category = isEdit ? editItem?.kategori ?? "" : formData.kategori;
+    if (!title) {
+      alert("Isi nama koleksi terlebih dahulu sebelum membuat deskripsi dengan AI.");
+      return;
+    }
+
+    setGeneratingDescription(true);
+    try {
+      const { description } = await aiApi.generateDescription({ title, category });
+      if (isEdit) {
+        setEditItem(prev => prev ? { ...prev, deskripsi_lengkap: description } : null);
+      } else {
+        setFormData(prev => ({ ...prev, deskripsi_lengkap: description }));
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Gagal membuat deskripsi dengan AI.");
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
+
   // ─── Hapus Koleksi ─────────────────────────────────────────────────────────
   const handleDelete = async (id: number) => {
     if (!confirm("Apakah Anda yakin ingin menghapus koleksi ini?")) return;
@@ -159,7 +183,7 @@ export default function KatalogKoleksiPage() {
       {/* ERROR BANNER */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex justify-between">
-          <span>⚠️ {error} — Pastikan backend berjalan di <code>http://localhost:3001</code></span>
+          <span>⚠️ {error} — Pastikan URL backend sudah dikonfigurasi.</span>
           <button onClick={fetchData} className="text-red-500 hover:underline text-xs">Coba Lagi</button>
         </div>
       )}
@@ -239,6 +263,15 @@ export default function KatalogKoleksiPage() {
               <label className="block font-semibold text-slate-700">Keterangan Singkat
                 <input value={formData.sub_deskripsi} onChange={e => setFormData({ ...formData, sub_deskripsi: e.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
               </label>
+              <div>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <label htmlFor="add-collection-description" className="font-semibold text-slate-700">Deskripsi Lengkap</label>
+                  <button type="button" onClick={() => handleGenerateDescription(false)} disabled={generatingDescription} className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50">
+                    {generatingDescription ? "Sedang membuat..." : "✨ Buat Deskripsi dengan AI"}
+                  </button>
+                </div>
+                <textarea id="add-collection-description" rows={4} value={formData.deskripsi_lengkap} onChange={e => setFormData({ ...formData, deskripsi_lengkap: e.target.value })} className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block font-semibold text-slate-700">Kategori
                   <select value={formData.kategori} onChange={e => setFormData({ ...formData, kategori: e.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal">
@@ -311,6 +344,15 @@ export default function KatalogKoleksiPage() {
               <label className="block font-semibold text-slate-700">Keterangan Singkat
                 <input value={editItem.sub_deskripsi} onChange={e => setEditItem({ ...editItem, sub_deskripsi: e.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
               </label>
+              <div>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <label htmlFor="edit-collection-description" className="font-semibold text-slate-700">Deskripsi Lengkap</label>
+                  <button type="button" onClick={() => handleGenerateDescription(true)} disabled={generatingDescription} className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50">
+                    {generatingDescription ? "Sedang membuat..." : "✨ Buat Deskripsi dengan AI"}
+                  </button>
+                </div>
+                <textarea id="edit-collection-description" rows={4} value={editItem.deskripsi_lengkap ?? ""} onChange={e => setEditItem({ ...editItem, deskripsi_lengkap: e.target.value })} className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal" />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block font-semibold text-slate-700">Kategori
                   <select value={editItem.kategori} onChange={e => setEditItem({ ...editItem, kategori: e.target.value })} className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal">
