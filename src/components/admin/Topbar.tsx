@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { Bell, ChevronDown, LogOut, RefreshCw, User, UserCheck } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Bell, ChevronDown, LogOut, Menu, RefreshCw, User, UserCheck, X } from "lucide-react";
 import { dashboardApi } from "@/lib/api";
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
@@ -35,11 +35,16 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
 
 interface TopbarProps {
   onOpenLogout: () => void;
+  onToggleSidebar: () => void;
+  sidebarOpen: boolean;
 }
 
-export default function Topbar({ onOpenLogout }: TopbarProps) {
+export default function Topbar({
+  onOpenLogout,
+  onToggleSidebar,
+  sidebarOpen,
+}: TopbarProps) {
   const pathname = usePathname();
-  const router = useRouter();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -62,7 +67,7 @@ export default function Topbar({ onOpenLogout }: TopbarProps) {
           setNotifItems(res.data.notifications.pendingBookings);
           setHasUnread(res.data.notifications.pendingBookings.length > 0);
         }
-      } catch (_) {}
+      } catch {}
     }
     loadNotifs();
   }, []);
@@ -82,19 +87,30 @@ export default function Topbar({ onOpenLogout }: TopbarProps) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex min-h-[64px] items-center justify-between border-b border-[#E2DDD5] bg-[#FFFFFF]/90 px-5 backdrop-blur-md transition-all duration-200 md:px-8">
+    <header className="sticky top-0 z-30 flex min-h-[64px] items-center justify-between gap-2 border-b border-[#E2DDD5] bg-[#FFFFFF]/90 px-3 backdrop-blur-md transition-all duration-200 sm:px-5 md:px-8">
+      <button
+        type="button"
+        className="mobile-menu-button"
+        aria-label={sidebarOpen ? "Tutup navigasi" : "Buka navigasi"}
+        aria-expanded={sidebarOpen}
+        aria-controls="admin-sidebar"
+        onClick={onToggleSidebar}
+      >
+        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
       {/* Title & Subtitle Seragam */}
-      <div className="flex flex-col justify-center py-2">
-        <h1 className="text-base font-extrabold uppercase tracking-wider text-[#1E2922] font-sans md:text-lg">
+      <div className="flex min-w-0 flex-1 flex-col justify-center py-2">
+        <h1 className="truncate font-sans text-xs font-extrabold uppercase tracking-wider text-[#1E2922] sm:text-base md:text-lg">
           {currentMeta.title}
         </h1>
-        <p className="hidden text-xs text-[#727A71] md:block">
+        <p className="hidden truncate text-xs text-[#727A71] md:block">
           {currentMeta.subtitle}
         </p>
       </div>
 
       {/* Right Controls: Refresh, Notifications, Profile Dropdown */}
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {/* Tombol Refresh Halaman */}
         <button
           type="button"

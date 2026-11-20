@@ -42,8 +42,8 @@ export default function DashboardTransactionsSection({
             📥 Ekspor Data (CSV)
           </button>
         </div>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "11px" }}>
+        <div className="w-full overflow-x-auto">
+          <table className="w-full min-w-[680px] border-collapse text-left text-[11px]">
             <thead>
               <tr style={{ backgroundColor: "#f9fafb", color: "#9ca3af", borderBottom: "1px solid #f0f0f0", fontSize: "10px" }}>
                 <th style={{ padding: "10px 18px" }}>ID TRANSAKSI</th>

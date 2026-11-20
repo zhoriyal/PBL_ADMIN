@@ -1,12 +1,51 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type FormEvent } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { tiketApi } from "@/lib/api";
 import TicketStatsSection from "./components/TicketStatsSection";
 import TicketCategoriesSection from "./components/TicketCategoriesSection";
 import TicketBookingsSection from "./components/TicketBookingsSection";
 import type { TicketBooking, TicketCategory } from "./components/types";
+
+const CATEGORY_RENAME_MAP: Record<string, string> = {
+  // Isi jika ada nama kategori lama -> nama kategori baru sesuai catatan dosen, contoh:
+  // "Tiket Dewasa": "Pengunjung Umum",
+};
+
+const normalizeCategoryTitle = (title?: string): string => {
+  const trimmed = (title || "").trim();
+  if (!trimmed) return "";
+  return CATEGORY_RENAME_MAP[trimmed] ?? trimmed;
+};
+
+const validateCategoryPayload = (input: {
+  badge: string;
+  title: string;
+  price: number;
+  kuota: number;
+  requireBadge?: boolean;
+}): string => {
+  const trimmedTitle = input.title.trim();
+  const trimmedBadge = input.badge.trim();
+
+  if (input.requireBadge && !trimmedBadge) {
+    return "Label badge kategori wajib diisi.";
+  }
+  if (!trimmedTitle) {
+    return "Nama kategori tiket wajib diisi.";
+  }
+  if (trimmedTitle.length < 2) {
+    return "Nama kategori tiket minimal 2 karakter.";
+  }
+  if (!Number.isFinite(input.price) || input.price < 0) {
+    return "Harga tiket harus berupa angka valid (minimal Rp 0).";
+  }
+  if (!Number.isInteger(input.kuota) || input.kuota < 1) {
+    return "Kuota harian harus berupa bilangan bulat minimal 1.";
+  }
+  return "";
+};
 
 export default function ManajemenTiketPage() {
   const [categories, setCategories] = useState<TicketCategory[]>([]);
@@ -21,7 +60,9 @@ export default function ManajemenTiketPage() {
   const [selectedBooking, setSelectedBooking] = useState<TicketBooking | null>(null);
   const [scanModalBooking, setScanModalBooking] = useState<TicketBooking | null>(null);
   const [editCategory, setEditCategory] = useState<TicketCategory | null>(null);
+  const [editFormError, setEditFormError] = useState("");
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [addFormError, setAddFormError] = useState("");
   const [saving, setSaving] = useState(false);
   const [checkInSaving, setCheckInSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -39,12 +80,19 @@ export default function ManajemenTiketPage() {
         tiketApi.getBookings({ limit: 100 }),
         tiketApi.getStats(),
       ]);
-      setCategories(catRes.data);
-      setBookings(bookRes.data);
+      const normalizedCategories: TicketCategory[] = Array.isArray(catRes?.data)
+        ? catRes.data.map((item: TicketCategory) => ({
+            ...item,
+            title: normalizeCategoryTitle(item.title),
+          }))
+        : [];
+
+      setCategories(normalizedCategories);
+      setBookings(Array.isArray(bookRes?.data) ? bookRes.data : []);
       setStats({
-        terjualHariIni: statsRes.data.terjualHariIni,
-        sudahCheckIn: statsRes.data.sudahCheckIn,
-        pendapatanHariIni: statsRes.data.pendapatanHariIni,
+        terjualHariIni: Number(statsRes?.data?.terjualHariIni) || 0,
+        sudahCheckIn: Number(statsRes?.data?.sudahCheckIn) || 0,
+        pendapatanHariIni: Number(statsRes?.data?.pendapatanHariIni) || 0,
       });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Gagal memuat data");
@@ -53,72 +101,148 @@ export default function ManajemenTiketPage() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void fetchData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchData]);
 
   // Filter bookings
+  const normalizedSearch = searchQuery.trim().toLowerCase();
   const filteredBookings = bookings.filter((b) => {
-    const matchSearch = b.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.nama.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch =
+      !normalizedSearch ||
+      b.id.toLowerCase().includes(normalizedSearch) ||
+      b.nama.toLowerCase().includes(normalizedSearch);
     const matchStatus = statusFilter === "ALL" || b.status === statusFilter;
     return matchSearch && matchStatus;
   });
   const totalBookingPages = Math.max(1, Math.ceil(filteredBookings.length / bookingsPerPage));
-  const paginatedBookings = filteredBookings.slice((currentPage - 1) * bookingsPerPage, currentPage * bookingsPerPage);
+  const safeCurrentPage = Math.min(currentPage, totalBookingPages);
+  const paginatedBookings = filteredBookings.slice(
+    (safeCurrentPage - 1) * bookingsPerPage,
+    safeCurrentPage * bookingsPerPage
+  );
 
   // Export CSV
+  const escapeCsvCell = (value: unknown) => {
+    const str = String(value ?? "");
+    return `"${str.replace(/"/g, '""')}"`;
+  };
+
   const handleExportCSV = () => {
-    const headers = ["ID Transaksi,Nama,Email,Total Tiket,Tgl Kunjungan,Total Biaya,Status,Check-In\n"];
-    const rows = bookings.map(b =>
-      `${b.id},${b.nama},${b.email},${b.total_tiket},${b.visit_date},${b.total_biaya},${b.status},${b.checked_in ? "Ya" : "Tidak"}`
+    const headers = ["ID Transaksi,Nama,Email,Total Tiket,Tgl Kunjungan,Total Biaya,Status,Check-In"];
+    const rows = filteredBookings.map((b) =>
+      [
+        escapeCsvCell(b.id),
+        escapeCsvCell(b.nama),
+        escapeCsvCell(b.email),
+        escapeCsvCell(b.total_tiket),
+        escapeCsvCell(b.visit_date),
+        escapeCsvCell(b.total_biaya),
+        escapeCsvCell(b.status),
+        escapeCsvCell(b.checked_in ? "Ya" : "Tidak"),
+      ].join(",")
     );
-    const blob = new Blob([headers + rows.join("\n")], { type: "text/csv" });
+    const blob = new Blob([[...headers, ...rows].join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `Laporan_Tiket_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
+    URL.revokeObjectURL(url);
   };
 
   // Tambah kategori
-  const handleAddCategory = async (e: React.FormEvent) => {
+  const handleAddCategory = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newCat.title || !newCat.badge) return;
+    setAddFormError("");
+    setSuccessMessage("");
+
+    const trimmedBadge = newCat.badge.trim().toUpperCase();
+    const trimmedTitle = normalizeCategoryTitle(newCat.title);
+    const numPrice = Number(newCat.price);
+    const numKuota = Number(newCat.kuota);
+
+    const validationMsg = validateCategoryPayload({
+      badge: trimmedBadge,
+      title: trimmedTitle,
+      price: numPrice,
+      kuota: numKuota,
+      requireBadge: true,
+    });
+
+    if (validationMsg) {
+      setAddFormError(validationMsg);
+      return;
+    }
+
     setSaving(true);
     try {
       await tiketApi.addCategory({
-        badge: newCat.badge.toUpperCase(),
+        badge: trimmedBadge,
         badge_bg: "#e0f2fe",
         badge_color: "#0369a1",
-        title: newCat.title,
-        price: newCat.price,
-        kuota: newCat.kuota,
+        title: trimmedTitle,
+        price: numPrice,
+        kuota: numKuota,
         status: "Aktif",
       });
       await fetchData();
       setIsAddCategoryOpen(false);
+      setAddFormError("");
       setNewCat({ badge: "", title: "", price: 0, kuota: 100 });
+      setSuccessMessage("Kategori tiket baru berhasil ditambahkan.");
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Gagal menyimpan");
-    } finally { setSaving(false); }
+      setAddFormError(err instanceof Error ? err.message : "Gagal menyimpan kategori tiket.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Edit kategori
-  const handleSaveEditCategory = async (e: React.FormEvent) => {
+  const handleSaveEditCategory = async (e: FormEvent) => {
     e.preventDefault();
     if (!editCategory) return;
+
+    setEditFormError("");
+    setSuccessMessage("");
+
+    const trimmedTitle = normalizeCategoryTitle(editCategory.title);
+    const numPrice = Number(editCategory.price);
+    const numKuota = Number(editCategory.kuota);
+
+    const validationMsg = validateCategoryPayload({
+      badge: editCategory.badge || "",
+      title: trimmedTitle,
+      price: numPrice,
+      kuota: numKuota,
+      requireBadge: false,
+    });
+
+    if (validationMsg) {
+      setEditFormError(validationMsg);
+      return;
+    }
+
     setSaving(true);
     try {
       await tiketApi.updateCategory(String(editCategory.id), {
-        title: editCategory.title,
-        price: editCategory.price,
-        kuota: editCategory.kuota,
+        title: trimmedTitle,
+        price: numPrice,
+        kuota: numKuota,
         status: editCategory.status,
       });
       await fetchData();
       setEditCategory(null);
+      setEditFormError("");
+      setSuccessMessage("Perubahan kategori tiket berhasil disimpan.");
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Gagal menyimpan perubahan");
-    } finally { setSaving(false); }
+      setEditFormError(err instanceof Error ? err.message : "Gagal menyimpan perubahan.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Check-in
@@ -130,7 +254,7 @@ export default function ManajemenTiketPage() {
     try {
       const response = await tiketApi.checkIn(booking.id);
       setBookings((current) =>
-        current.map((item) => item.id === booking.id ? { ...item, ...response.data } : item)
+        current.map((item) => (item.id === booking.id ? { ...item, ...response.data } : item))
       );
       await fetchData();
       setScanModalBooking(null);
@@ -144,29 +268,63 @@ export default function ManajemenTiketPage() {
 
   return (
     <div style={{ fontFamily: "Georgia, serif", color: "#2B2823", padding: "8px 4px", position: "relative" }}>
-
       {/* Error Banner */}
       {error && (
-        <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fca5a5", color: "#dc2626", padding: "10px 16px", borderRadius: "8px", marginBottom: "16px", fontSize: "12px", display: "flex", justifyContent: "space-between" }}>
-          <span>⚠️ {error} — Pastikan URL backend sudah dikonfigurasi.</span>
-          <button onClick={fetchData} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontWeight: "700" }}>Coba Lagi</button>
+        <div
+          style={{
+            backgroundColor: "#fef2f2",
+            border: "1px solid #fca5a5",
+            color: "#dc2626",
+            padding: "10px 16px",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            fontSize: "12px",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>⚠️ {error}</span>
+          <button
+            type="button"
+            onClick={fetchData}
+            style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontWeight: "700" }}
+          >
+            Coba Lagi
+          </button>
         </div>
       )}
 
       {successMessage && (
-        <div role="status" style={{ backgroundColor: "#ECFDF5", border: "1px solid #A7F3D0", color: "#047857", padding: "10px 16px", borderRadius: "8px", marginBottom: "16px", fontSize: "12px", fontWeight: "700" }}>
+        <div
+          role="status"
+          style={{
+            backgroundColor: "#ECFDF5",
+            border: "1px solid #A7F3D0",
+            color: "#047857",
+            padding: "10px 16px",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            fontSize: "12px",
+            fontWeight: "700",
+          }}
+        >
           {successMessage}
         </div>
       )}
-
 
       <TicketStatsSection loading={loading} stats={stats} />
 
       <TicketCategoriesSection
         loading={loading}
         categories={categories}
-        onAdd={() => setIsAddCategoryOpen(true)}
-        onEdit={(category) => setEditCategory({ ...category })}
+        onAdd={() => {
+          setAddFormError("");
+          setIsAddCategoryOpen(true);
+        }}
+        onEdit={(category) => {
+          setEditFormError("");
+          setEditCategory({ ...category, title: normalizeCategoryTitle(category.title) });
+        }}
       />
 
       <TicketBookingsSection
@@ -175,11 +333,17 @@ export default function ManajemenTiketPage() {
         filteredCount={filteredBookings.length}
         searchQuery={searchQuery}
         statusFilter={statusFilter}
-        currentPage={currentPage}
+        currentPage={safeCurrentPage}
         totalPages={totalBookingPages}
         itemsPerPage={bookingsPerPage}
-        onSearchChange={(value) => { setSearchQuery(value); setCurrentPage(1); }}
-        onStatusChange={(value) => { setStatusFilter(value); setCurrentPage(1); }}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+        }}
+        onStatusChange={(value) => {
+          setStatusFilter(value);
+          setCurrentPage(1);
+        }}
         onPageChange={setCurrentPage}
         onExport={handleExportCSV}
         onShowDetail={setSelectedBooking}
@@ -188,9 +352,33 @@ export default function ManajemenTiketPage() {
 
       {/* Modal Detail Pemesanan */}
       {selectedBooking && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "12px", width: "360px", border: "1px solid #E7E5E4", fontFamily: "sans-serif" }}>
-            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 12px 0", color: "#1C1917" }}>Rincian Tiket Pengunjung</h3>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#FFFFFF",
+              padding: "20px",
+              borderRadius: "12px",
+              width: "360px",
+              border: "1px solid #E7E5E4",
+              fontFamily: "sans-serif",
+            }}
+          >
+            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 12px 0", color: "#1C1917" }}>
+              Rincian Tiket Pengunjung
+            </h3>
             <div style={{ fontSize: "11px", display: "flex", flexDirection: "column", gap: "6px", color: "#44403C" }}>
               {[
                 ["ID Transaksi", selectedBooking.id],
@@ -204,40 +392,164 @@ export default function ManajemenTiketPage() {
                 ["Tanggal Kunjungan", selectedBooking.visit_date],
                 ["Sesi", selectedBooking.sesi],
                 ["Metode Bayar", selectedBooking.payment_method],
-                ["Total Biaya", `Rp ${selectedBooking.total_biaya.toLocaleString("id-ID")}`],
+                ["Total Biaya", `Rp ${(Number(selectedBooking.total_biaya) || 0).toLocaleString("id-ID")}`],
                 ["Status", selectedBooking.status],
                 ["Check-In", selectedBooking.checked_in ? "✅ Sudah" : "⏳ Belum"],
-                ...(selectedBooking.checked_in_at ? [["Waktu Check-In", new Date(selectedBooking.checked_in_at).toLocaleString("id-ID")]] : []),
+                ...(selectedBooking.checked_in_at
+                  ? [["Waktu Check-In", new Date(selectedBooking.checked_in_at).toLocaleString("id-ID")]]
+                  : []),
               ].map(([label, value]) => (
-                <p key={label} style={{ margin: 0 }}><strong>{label}:</strong> {value}</p>
+                <p key={label} style={{ margin: 0 }}>
+                  <strong>{label}:</strong> {value}
+                </p>
               ))}
             </div>
-            <button onClick={() => setSelectedBooking(null)} style={{ marginTop: "16px", width: "100%", padding: "8px", backgroundColor: "#1C1917", color: "#FFFFFF", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "11px", fontWeight: "700" }}>Tutup</button>
+            <button
+              type="button"
+              onClick={() => setSelectedBooking(null)}
+              style={{
+                marginTop: "16px",
+                width: "100%",
+                padding: "8px",
+                backgroundColor: "#1C1917",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "11px",
+                fontWeight: "700",
+              }}
+            >
+              Tutup
+            </button>
           </div>
         </div>
       )}
 
       {/* Modal Scan Check-In */}
       {scanModalBooking && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "12px", width: "320px", textAlign: "center", border: "1px solid #E7E5E4", fontFamily: "sans-serif" }}>
-            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 8px 0", color: "#1C1917" }}>Scan Check-In Tiket</h3>
-            <p style={{ fontSize: "11px", color: "#78716C", margin: "0 0 16px 0" }}>Kode: {scanModalBooking.id}</p>
-            <div style={{ width: "184px", height: "184px", backgroundColor: "#FFFFFF", border: "1px solid #E7E5E4", borderRadius: "8px", margin: "0 auto 16px auto", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <QRCodeSVG value={scanModalBooking.id} size={168} level="H" marginSize={2} title={`QR Tiket ${scanModalBooking.id}`} />
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#FFFFFF",
+              padding: "20px",
+              borderRadius: "12px",
+              width: "320px",
+              textAlign: "center",
+              border: "1px solid #E7E5E4",
+              fontFamily: "sans-serif",
+            }}
+          >
+            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 8px 0", color: "#1C1917" }}>
+              Scan Check-In Tiket
+            </h3>
+            <p style={{ fontSize: "11px", color: "#78716C", margin: "0 0 16px 0" }}>
+              Kode: {scanModalBooking.id}
+            </p>
+            <div
+              style={{
+                width: "184px",
+                height: "184px",
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E7E5E4",
+                borderRadius: "8px",
+                margin: "0 auto 16px auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <QRCodeSVG
+                value={scanModalBooking.id}
+                size={168}
+                level="H"
+                marginSize={2}
+                title={`QR Tiket ${scanModalBooking.id}`}
+              />
             </div>
-            <p style={{ fontSize: "12px", fontWeight: "700", margin: "0 0 4px 0", color: "#1C1917" }}>{scanModalBooking.nama}</p>
-            <p style={{ fontSize: "11px", color: "#78716C", margin: "0 0 12px 0" }}>{scanModalBooking.total_tiket} Tiket • {scanModalBooking.visit_date}</p>
+            <p style={{ fontSize: "12px", fontWeight: "700", margin: "0 0 4px 0", color: "#1C1917" }}>
+              {scanModalBooking.nama}
+            </p>
+            <p style={{ fontSize: "11px", color: "#78716C", margin: "0 0 12px 0" }}>
+              {scanModalBooking.total_tiket} Tiket • {scanModalBooking.visit_date}
+            </p>
             {scanModalBooking.checked_in ? (
-              <p style={{ fontSize: "11px", color: "#B45309", margin: "0 0 12px 0" }}>Tiket ini sudah digunakan untuk check-in.</p>
+              <p style={{ fontSize: "11px", color: "#B45309", margin: "0 0 12px 0" }}>
+                Tiket ini sudah digunakan untuk check-in.
+              </p>
             ) : scanModalBooking.status !== "LUNAS" ? (
-              <p style={{ fontSize: "11px", color: "#B45309", margin: "0 0 12px 0" }}>Pembayaran belum lunas. Check-in tidak dapat dilakukan.</p>
+              <p style={{ fontSize: "11px", color: "#B45309", margin: "0 0 12px 0" }}>
+                Pembayaran belum lunas. Check-in tidak dapat dilakukan.
+              </p>
             ) : null}
             <div style={{ display: "flex", gap: "8px" }}>
-              <button onClick={() => handleConfirmCheckIn(scanModalBooking)} disabled={checkInSaving || scanModalBooking.status !== "LUNAS" || Boolean(scanModalBooking.checked_in)} style={{ flex: 1, padding: "8px", backgroundColor: "#059669", color: "#FFFFFF", border: "none", borderRadius: "6px", cursor: checkInSaving || scanModalBooking.status !== "LUNAS" || Boolean(scanModalBooking.checked_in) ? "not-allowed" : "pointer", fontSize: "11px", fontWeight: "700", opacity: checkInSaving || scanModalBooking.status !== "LUNAS" || Boolean(scanModalBooking.checked_in) ? 0.6 : 1 }}>
-                {checkInSaving ? "Menyimpan..." : scanModalBooking.checked_in ? "Sudah Check-In" : "✅ Konfirmasi Check-In"}
+              <button
+                type="button"
+                onClick={() => handleConfirmCheckIn(scanModalBooking)}
+                disabled={
+                  checkInSaving ||
+                  scanModalBooking.status !== "LUNAS" ||
+                  Boolean(scanModalBooking.checked_in)
+                }
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  backgroundColor: "#059669",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor:
+                    checkInSaving ||
+                    scanModalBooking.status !== "LUNAS" ||
+                    Boolean(scanModalBooking.checked_in)
+                      ? "not-allowed"
+                      : "pointer",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  opacity:
+                    checkInSaving ||
+                    scanModalBooking.status !== "LUNAS" ||
+                    Boolean(scanModalBooking.checked_in)
+                      ? 0.6
+                      : 1,
+                }}
+              >
+                {checkInSaving
+                  ? "Menyimpan..."
+                  : scanModalBooking.checked_in
+                    ? "Sudah Check-In"
+                    : "✅ Konfirmasi Check-In"}
               </button>
-              <button onClick={() => setScanModalBooking(null)} disabled={checkInSaving} style={{ flex: 1, padding: "8px", backgroundColor: "#FAFAF9", color: "#44403C", border: "1px solid #E7E5E4", borderRadius: "6px", cursor: checkInSaving ? "not-allowed" : "pointer", fontSize: "11px" }}>Batal</button>
+              <button
+                type="button"
+                onClick={() => setScanModalBooking(null)}
+                disabled={checkInSaving}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  backgroundColor: "#FAFAF9",
+                  color: "#44403C",
+                  border: "1px solid #E7E5E4",
+                  borderRadius: "6px",
+                  cursor: checkInSaving ? "not-allowed" : "pointer",
+                  fontSize: "11px",
+                }}
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>
@@ -245,22 +557,150 @@ export default function ManajemenTiketPage() {
 
       {/* Modal Tambah Kategori */}
       {isAddCategoryOpen && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <form onSubmit={handleAddCategory} style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "12px", width: "320px", border: "1px solid #E7E5E4", fontFamily: "sans-serif" }}>
-            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 12px 0", color: "#1C1917" }}>Tambah Kategori Tiket</h3>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <form
+            onSubmit={handleAddCategory}
+            noValidate
+            style={{
+              backgroundColor: "#FFFFFF",
+              padding: "20px",
+              borderRadius: "12px",
+              width: "340px",
+              border: "1px solid #E7E5E4",
+              fontFamily: "sans-serif",
+            }}
+          >
+            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 12px 0", color: "#1C1917" }}>
+              Tambah Kategori Tiket
+            </h3>
+
+            {addFormError && (
+              <div
+                role="alert"
+                style={{
+                  backgroundColor: "#FEF2F2",
+                  border: "1px solid #FCA5A5",
+                  color: "#B91C1C",
+                  padding: "8px 10px",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  marginBottom: "10px",
+                }}
+              >
+                {addFormError}
+              </div>
+            )}
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "11px" }}>
-              <label><span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>Label Badge (e.g. DEWASA)</span>
-                <input required value={newCat.badge} onChange={e => setNewCat({ ...newCat, badge: e.target.value })} style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>Nama Kategori Tiket</span>
-                <input required value={newCat.title} onChange={e => setNewCat({ ...newCat, title: e.target.value })} style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>Harga (Rp)</span>
-                <input type="number" required value={newCat.price} onChange={e => setNewCat({ ...newCat, price: Number(e.target.value) })} style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>Kuota Harian</span>
-                <input type="number" required value={newCat.kuota} onChange={e => setNewCat({ ...newCat, kuota: Number(e.target.value) })} style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }} /></label>
+              <label>
+                <span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>
+                  Label Badge (e.g. DEWASA)
+                </span>
+                <input
+                  value={newCat.badge}
+                  onChange={(e) => {
+                    setNewCat({ ...newCat, badge: e.target.value });
+                    if (addFormError) setAddFormError("");
+                  }}
+                  style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
+                />
+              </label>
+              <label>
+                <span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>
+                  Nama Kategori Tiket
+                </span>
+                <input
+                  value={newCat.title}
+                  onChange={(e) => {
+                    setNewCat({ ...newCat, title: e.target.value });
+                    if (addFormError) setAddFormError("");
+                  }}
+                  style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
+                />
+              </label>
+              <label>
+                <span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>
+                  Harga (Rp)
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  value={newCat.price}
+                  onChange={(e) => {
+                    setNewCat({ ...newCat, price: e.target.value === "" ? NaN : Number(e.target.value) });
+                    if (addFormError) setAddFormError("");
+                  }}
+                  style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
+                />
+              </label>
+              <label>
+                <span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>
+                  Kuota Harian
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  value={newCat.kuota}
+                  onChange={(e) => {
+                    setNewCat({ ...newCat, kuota: e.target.value === "" ? NaN : Number(e.target.value) });
+                    if (addFormError) setAddFormError("");
+                  }}
+                  style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
+                />
+              </label>
             </div>
+
             <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
-              <button type="submit" disabled={saving} style={{ flex: 1, padding: "8px", backgroundColor: "#224229", color: "#FFFFFF", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "11px", fontWeight: "700", opacity: saving ? 0.6 : 1 }}>{saving ? "Menyimpan..." : "Simpan"}</button>
-              <button type="button" onClick={() => setIsAddCategoryOpen(false)} style={{ flex: 1, padding: "8px", backgroundColor: "#FAFAF9", color: "#44403C", border: "1px solid #E7E5E4", borderRadius: "6px", cursor: "pointer", fontSize: "11px" }}>Batal</button>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  backgroundColor: "#224229",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: saving ? "not-allowed" : "pointer",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  opacity: saving ? 0.6 : 1,
+                }}
+              >
+                {saving ? "Menyimpan..." : "Simpan"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddCategoryOpen(false);
+                  setAddFormError("");
+                }}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  backgroundColor: "#FAFAF9",
+                  color: "#44403C",
+                  border: "1px solid #E7E5E4",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "11px",
+                }}
+              >
+                Batal
+              </button>
             </div>
           </form>
         </div>
@@ -268,20 +708,143 @@ export default function ManajemenTiketPage() {
 
       {/* Modal Edit Kategori */}
       {editCategory && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <form onSubmit={handleSaveEditCategory} style={{ backgroundColor: "#FFFFFF", padding: "20px", borderRadius: "12px", width: "320px", border: "1px solid #E7E5E4", fontFamily: "sans-serif" }}>
-            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 12px 0", color: "#1C1917" }}>Edit Kategori Tiket</h3>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+        >
+          <form
+            onSubmit={handleSaveEditCategory}
+            noValidate
+            style={{
+              backgroundColor: "#FFFFFF",
+              padding: "20px",
+              borderRadius: "12px",
+              width: "340px",
+              border: "1px solid #E7E5E4",
+              fontFamily: "sans-serif",
+            }}
+          >
+            <h3 style={{ fontSize: "14px", fontWeight: "800", margin: "0 0 12px 0", color: "#1C1917" }}>
+              Edit Kategori Tiket
+            </h3>
+
+            {editFormError && (
+              <div
+                role="alert"
+                style={{
+                  backgroundColor: "#FEF2F2",
+                  border: "1px solid #FCA5A5",
+                  color: "#B91C1C",
+                  padding: "8px 10px",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  marginBottom: "10px",
+                }}
+              >
+                {editFormError}
+              </div>
+            )}
+
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "11px" }}>
-              <label><span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>Nama Kategori</span>
-                <input value={editCategory.title} onChange={e => setEditCategory({ ...editCategory, title: e.target.value })} style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>Harga per Orang (Rp)</span>
-                <input type="number" value={editCategory.price} onChange={e => setEditCategory({ ...editCategory, price: Number(e.target.value) })} style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }} /></label>
-              <label><span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>Kuota Harian</span>
-                <input type="number" value={editCategory.kuota} onChange={e => setEditCategory({ ...editCategory, kuota: Number(e.target.value) })} style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }} /></label>
+              <label>
+                <span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>
+                  Nama Kategori
+                </span>
+                <input
+                  value={editCategory.title}
+                  onChange={(e) => {
+                    setEditCategory({ ...editCategory, title: e.target.value });
+                    if (editFormError) setEditFormError("");
+                  }}
+                  style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
+                />
+              </label>
+              <label>
+                <span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>
+                  Harga per Orang (Rp)
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  value={editCategory.price}
+                  onChange={(e) => {
+                    setEditCategory({
+                      ...editCategory,
+                      price: e.target.value === "" ? NaN : Number(e.target.value),
+                    });
+                    if (editFormError) setEditFormError("");
+                  }}
+                  style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
+                />
+              </label>
+              <label>
+                <span style={{ display: "block", marginBottom: "4px", fontWeight: "700" }}>
+                  Kuota Harian
+                </span>
+                <input
+                  type="number"
+                  min={1}
+                  value={editCategory.kuota}
+                  onChange={(e) => {
+                    setEditCategory({
+                      ...editCategory,
+                      kuota: e.target.value === "" ? NaN : Number(e.target.value),
+                    });
+                    if (editFormError) setEditFormError("");
+                  }}
+                  style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
+                />
+              </label>
             </div>
+
             <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
-              <button type="submit" disabled={saving} style={{ flex: 1, padding: "8px", backgroundColor: "#224229", color: "#FFFFFF", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "11px", fontWeight: "700", opacity: saving ? 0.6 : 1 }}>{saving ? "Menyimpan..." : "Simpan"}</button>
-              <button type="button" onClick={() => setEditCategory(null)} style={{ flex: 1, padding: "8px", backgroundColor: "#FAFAF9", color: "#44403C", border: "1px solid #E7E5E4", borderRadius: "6px", cursor: "pointer", fontSize: "11px" }}>Batal</button>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  backgroundColor: "#224229",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: saving ? "not-allowed" : "pointer",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  opacity: saving ? 0.6 : 1,
+                }}
+              >
+                {saving ? "Menyimpan..." : "Simpan"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditCategory(null);
+                  setEditFormError("");
+                }}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  backgroundColor: "#FAFAF9",
+                  color: "#44403C",
+                  border: "1px solid #E7E5E4",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "11px",
+                }}
+              >
+                Batal
+              </button>
             </div>
           </form>
         </div>

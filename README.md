@@ -22,7 +22,7 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 The admin routes (`/dashboard`, `/ulasan`, `/tiket`, `/pengaturan`, `/informasi`, and `/koleksi`, including their subroutes) require an authentication token. Requests without a token are redirected to `/login`; `/login` and `/register` remain public. A successful login stores the token for both the API client and the Next.js request guard, and logout clears both.
 
-The admin layout validates the token with the backend `/auth/me` endpoint and only allows `ADMIN`, `SUPERADMIN`, or `STAFF` roles. The image upload endpoint performs the same check and returns `401` when the session is missing, invalid, or not an admin session. This frontend guard complements, but does not replace, authorization on backend API routes.
+The admin layout validates the token with the backend `/auth/me` endpoint and only allows `ADMIN`, `SUPERADMIN`, or `STAFF` roles. Collection image uploads use the authenticated backend `POST /api/storage/uploads` endpoint; the backend stores the file in Vercel Blob and keeps the storage token private. This frontend guard complements, but does not replace, authorization on backend API routes.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
@@ -47,7 +47,7 @@ npx vercel link
 
 Di pengaturan project Vercel, pastikan **Root Directory** adalah `PBL_ADMIN` bila project dibuat dari root repository. Sebelum deploy, atur `NEXT_PUBLIC_API_URL` ke URL backend publik beserta `/api` (contoh `https://api.example.com/api`) dan `API_URL` ke URL backend yang sama. Tambahkan keduanya untuk environment Production di **Project Settings → Environment Variables**. Jangan masukkan kredensial backend ke `NEXT_PUBLIC_*`.
 
-Buat Vercel Blob Store di dashboard Vercel lalu hubungkan ke project ini. Integrasi tersebut menambahkan `BLOB_READ_WRITE_TOKEN` ke environment project; periksa bahwa variabel tersedia untuk Production (dan Preview bila diperlukan) sebelum menguji endpoint upload admin. Jangan menyalin token ke source control atau membagikannya di log.
+Buat Vercel Blob Store lalu atur `BLOB_READ_WRITE_TOKEN` hanya di environment backend (termasuk Production di Render). Jangan menaruh token di environment frontend, source control, atau log. Pastikan frontend memiliki `NEXT_PUBLIC_API_URL` yang menunjuk ke backend sebelum menguji upload gambar koleksi.
 
 Deploy preview dan production:
 

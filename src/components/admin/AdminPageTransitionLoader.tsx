@@ -9,12 +9,17 @@ function LoaderContent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Trigger loading sejenak saat URL/path berubah
-    setLoading(true);
-    const timer = setTimeout(() => {
+    // Trigger loading saat URL/path berubah melalui timer asynchronous
+    const startTimer = setTimeout(() => {
+      setLoading(true);
+    }, 0);
+    const endTimer = setTimeout(() => {
       setLoading(false);
     }, 450);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(startTimer);
+      clearTimeout(endTimer);
+    };
   }, [pathname, searchParams]);
 
   if (!loading) return null;

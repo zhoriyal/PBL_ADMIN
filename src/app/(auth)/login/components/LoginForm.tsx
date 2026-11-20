@@ -2,11 +2,41 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiNetworkError, authApi, OFFLINE_MOCK_TOKEN, setAuthToken } from "@/lib/api";
 import { validateEmail, validatePassword } from "@/lib/validation/auth";
 import { setStoredUser } from "@/lib/user-auth";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const getStrictEmailError = (rawEmail: string): string => {
+  const trimmed = rawEmail.trim();
+  if (!trimmed) {
+    return "Alamat email wajib diisi.";
+  }
+  const externalError = validateEmail(trimmed);
+  if (externalError) {
+    return externalError;
+  }
+  if (!EMAIL_REGEX.test(trimmed)) {
+    return "Format alamat email tidak valid.";
+  }
+  return "";
+};
+
+const getStrictPasswordError = (rawPassword: string): string => {
+  if (!rawPassword) {
+    return "Kata sandi wajib diisi.";
+  }
+  const externalError = validatePassword(rawPassword);
+  if (externalError) {
+    return externalError;
+  }
+  if (rawPassword.length < 6) {
+    return "Kata sandi minimal 6 karakter.";
+  }
+  return "";
+};
 
 export default function LoginForm() {
   const router = useRouter();
@@ -22,12 +52,15 @@ export default function LoginForm() {
     event.preventDefault();
     setLoginError("");
 
-    const emailErr = validateEmail(email);
-    const passErr = validatePassword(password);
+    const trimmedEmail = email.trim();
+    const emailErr = getStrictEmailError(trimmedEmail);
+    const passErr = getStrictPasswordError(password);
+
     setFieldErrors({
-      email: emailErr || "",
-      password: passErr || "",
+      email: emailErr,
+      password: passErr,
     });
+
     if (emailErr || passErr) {
       return;
     }
@@ -35,7 +68,7 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const res = await authApi.login(email.trim(), password);
+      const res = await authApi.login(trimmedEmail, password);
       if (!res?.success || !res.data?.token) {
         setLoginError(res?.message || "Login gagal. Periksa email dan password Anda.");
         return;
@@ -45,27 +78,28 @@ export default function LoginForm() {
       setStoredUser({
         id: res.data.id ?? res.data.username ?? "admin",
         nama: res.data.nama || "Administrator",
-        email: res.data.email || email.trim(),
+        email: res.data.email || trimmedEmail,
         username: res.data.username,
         role: res.data.role || "ADMIN",
       });
 
+      document.cookie = `museum-admin-token=${res.data.token}; path=/; max-age=86400`;
+
       if (rememberMe) {
-        window.localStorage.setItem("museum-admin-email", email.trim());
+        window.localStorage.setItem("museum-admin-email", trimmedEmail);
       } else {
         window.localStorage.removeItem("museum-admin-email");
       }
       router.push("/dashboard");
       return;
     } catch (err: unknown) {
-      // Mock login hanya tersedia untuk development ketika backend tidak dapat dijangkau.
       const ADMIN_EMAIL = "admin@museum.com";
       const ADMIN_PASSWORD = "admin123";
 
       if (
         process.env.NODE_ENV === "development" &&
         err instanceof ApiNetworkError &&
-        email.trim().toLowerCase() === ADMIN_EMAIL &&
+        trimmedEmail.toLowerCase() === ADMIN_EMAIL &&
         password === ADMIN_PASSWORD
       ) {
         setAuthToken(OFFLINE_MOCK_TOKEN);
@@ -76,8 +110,11 @@ export default function LoginForm() {
           username: "admin",
           role: "ADMIN",
         });
+
+        document.cookie = `museum-admin-token=${OFFLINE_MOCK_TOKEN}; path=/; max-age=86400`;
+
         if (rememberMe) {
-          window.localStorage.setItem("museum-admin-email", email.trim());
+          window.localStorage.setItem("museum-admin-email", trimmedEmail);
         } else {
           window.localStorage.removeItem("museum-admin-email");
         }
@@ -92,90 +129,100 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="login-container">
+    <div className="flex min-h-screen w-full flex-col md:flex-row bg-[#F7F3EA]">
       {/* LEFT PANEL — Museum Image */}
-      <div className="login-left">
+      <div className="relative hidden md:flex md:w-1/2 lg:w-3/5 flex-col justify-end p-8 lg:p-10 overflow-hidden bg-[#2C4A2C]">
         <Image
           src="/museum-brawijaya.jpg"
           alt="Museum Brawijaya Malang"
           fill
           style={{ objectFit: "cover", objectPosition: "center" }}
           priority
-          sizes="60vw"
+          sizes="(max-width: 768px) 0vw, 60vw"
         />
-        <div className="login-left-overlay" />
-        <div className="login-left-caption">
-          <p className="label">Sistem Pengelola</p>
-          <p className="museum-name">Museum Brawijaya Malang</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+        <div className="relative z-10 text-white">
+          <p className="text-xs uppercase tracking-widest text-[#CBB26A] font-semibold mb-1">
+            Sistem Pengelola
+          </p>
+          <p className="text-2xl lg:text-3xl font-bold">Museum Brawijaya Malang</p>
         </div>
       </div>
 
-      {/* RIGHT PANEL — Form */}
-      <div className="login-right">
-        <div className="login-form-wrapper w-full max-w-[368px]">
+      {/* RIGHT PANEL — Compact Form */}
+      <div className="flex w-full md:w-1/2 lg:w-2/5 items-center justify-center p-5 sm:p-7 lg:p-10">
+        <div className="w-full max-w-[380px] flex flex-col justify-center">
+          {/* Mobile Header Banner */}
+          <div className="block md:hidden mb-3 text-center">
+            <span className="text-xs font-semibold text-[#2C4A2C] uppercase tracking-wider">
+              Museum Brawijaya Malang
+            </span>
+          </div>
+
           {/* Badge */}
-          <div className="badge-wrapper mb-7 flex justify-center">
-            <span className="badge inline-flex items-center gap-2 rounded-full border border-emerald-900/15 bg-white/70 px-3 py-1.5 text-xs font-medium text-emerald-950">
-              <span className="badge-dot h-2 w-2 rounded-full bg-emerald-800" />
+          <div className="mb-3.5 flex justify-center md:justify-start">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-900/15 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-emerald-950 shadow-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-800" />
               Sistem Manajemen Internal
             </span>
           </div>
 
           {/* Heading */}
-          <div className="heading-group mb-8 text-center">
-            <h1 className="title mb-2 text-3xl font-bold tracking-wide text-[#1A1A1A]">Masuk ke Sistem</h1>
-            <p className="subtitle text-sm leading-relaxed text-[#6B6B6B]">
+          <div className="mb-4 text-center md:text-left">
+            <h1 className="mb-1 text-2xl font-bold tracking-tight text-[#1A1A1A]">
+              Masuk ke Sistem
+            </h1>
+            <p className="text-xs leading-snug text-[#6B6B6B]">
               Gunakan akun resmi pengelola untuk mengakses panel admin Museum Brawijaya.
             </p>
           </div>
 
           {/* Form */}
-          <form className="login-form flex w-full flex-col gap-5" onSubmit={handleSubmit} noValidate>
+          <form className="flex w-full flex-col gap-3" onSubmit={handleSubmit} noValidate>
             {loginError && (
               <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  background: "#FEF2F2",
-                  border: "1px solid #FCA5A5",
-                  color: "#B91C1C",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  marginBottom: "14px",
-                }}
+                role="alert"
+                className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-medium text-red-700"
               >
                 {loginError}
               </div>
             )}
 
             {/* Email Field */}
-            <div className="field-group flex flex-col gap-2">
-              <label htmlFor="email" className="field-label text-sm font-semibold text-[#1A1A1A]">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="email" className="text-xs font-semibold text-[#1A1A1A]">
                 Alamat Email
               </label>
-              <div className="input-wrapper relative">
-                <input
-                  id="email"
-                  name="email"
-                  type="text"
-                  autoComplete="username"
-                  required
-                  placeholder="admin@museum.com"
-                  className="input-field w-full rounded-lg border border-[#D8D0C0] bg-[#F8F4EC] px-4 py-3 text-sm text-[#1A1A1A] outline-none transition placeholder:text-[#ABA89F] focus:border-[#2C4A2C] focus:ring-2 focus:ring-[#2C4A2C]/15"
-                  value={email}
-                  aria-invalid={Boolean(fieldErrors.email)}
-                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setEmail(value);
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="username"
+                required
+                placeholder="admin@museum.com"
+                className="w-full rounded-lg border border-[#D8D0C0] bg-[#F8F4EC] px-3.5 py-2.5 text-sm text-[#1A1A1A] outline-none transition placeholder:text-[#ABA89F] focus:border-[#2C4A2C] focus:ring-2 focus:ring-[#2C4A2C]/15"
+                value={email}
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEmail(value);
+                  if (fieldErrors.email) {
                     setFieldErrors((current) => ({
                       ...current,
-                      email: value ? validateEmail(value) || "" : "",
+                      email: getStrictEmailError(value),
                     }));
-                    setLoginError("");
-                  }}
-                />
-              </div>
+                  }
+                  setLoginError("");
+                }}
+                onBlur={() => {
+                  setFieldErrors((current) => ({
+                    ...current,
+                    email: getStrictEmailError(email),
+                  }));
+                }}
+              />
               {fieldErrors.email && (
                 <p id="email-error" className="text-[11px] text-red-600" role="alert">
                   {fieldErrors.email}
@@ -184,16 +231,19 @@ export default function LoginForm() {
             </div>
 
             {/* Password Field */}
-            <div className="field-group flex flex-col gap-2">
-              <div className="label-row flex items-center justify-between gap-4">
-                <label htmlFor="password" className="field-label text-sm font-semibold text-[#1A1A1A]">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between gap-3">
+                <label htmlFor="password" className="text-xs font-semibold text-[#1A1A1A]">
                   Kata Sandi
                 </label>
-                <a href="#forgot" className="forgot-link text-xs font-semibold text-emerald-900 transition hover:text-emerald-700 hover:underline">
+                <a
+                  href="#forgot"
+                  className="text-[11px] font-semibold text-emerald-900 transition hover:text-emerald-700 hover:underline"
+                >
                   Lupa sandi?
                 </a>
               </div>
-              <div className="input-wrapper relative">
+              <div className="relative">
                 <input
                   id="password"
                   name="password"
@@ -201,31 +251,39 @@ export default function LoginForm() {
                   autoComplete="current-password"
                   required
                   placeholder="••••••••"
-                  className="input-field password-input w-full rounded-lg border border-[#D8D0C0] bg-[#F8F4EC] py-3 pl-4 pr-12 text-sm text-[#1A1A1A] outline-none transition placeholder:text-[#ABA89F] focus:border-[#2C4A2C] focus:ring-2 focus:ring-[#2C4A2C]/15"
+                  className="w-full rounded-lg border border-[#D8D0C0] bg-[#F8F4EC] py-2.5 pl-3.5 pr-10 text-sm text-[#1A1A1A] outline-none transition placeholder:text-[#ABA89F] focus:border-[#2C4A2C] focus:ring-2 focus:ring-[#2C4A2C]/15"
                   value={password}
                   aria-invalid={Boolean(fieldErrors.password)}
                   aria-describedby={fieldErrors.password ? "password-error" : undefined}
                   onChange={(e) => {
                     const value = e.target.value;
                     setPassword(value);
+                    if (fieldErrors.password) {
+                      setFieldErrors((current) => ({
+                        ...current,
+                        password: getStrictPasswordError(value),
+                      }));
+                    }
+                    setLoginError("");
+                  }}
+                  onBlur={() => {
                     setFieldErrors((current) => ({
                       ...current,
-                      password: value ? validatePassword(value) || "" : "",
+                      password: getStrictPasswordError(password),
                     }));
-                    setLoginError("");
                   }}
                 />
                 <button
                   type="button"
-                  className="toggle-password-btn absolute right-3 top-1/2 flex -translate-y-1/2 cursor-pointer items-center justify-center rounded p-1 text-slate-500 transition hover:text-emerald-900 focus-visible:outline-2 focus-visible:outline-emerald-800"
+                  className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center justify-center rounded p-1 text-slate-500 transition hover:text-emerald-900 focus-visible:outline-2 focus-visible:outline-emerald-800"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}
                 >
                   {showPassword ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="18"
-                      height="18"
+                      width="17"
+                      height="17"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -240,8 +298,8 @@ export default function LoginForm() {
                   ) : (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="18"
-                      height="18"
+                      width="17"
+                      height="17"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -264,23 +322,23 @@ export default function LoginForm() {
             </div>
 
             {/* Remember Me */}
-            <div className="remember-row -mt-1">
-              <label className="checkbox-label flex cursor-pointer items-center gap-2 text-xs text-[#4B5563]">
+            <div className="flex items-center pt-0.5">
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-[#4B5563]">
                 <input
                   type="checkbox"
                   name="remember-me"
-                  className="checkbox-input h-4 w-4 cursor-pointer accent-emerald-900"
+                  className="h-3.5 w-3.5 cursor-pointer accent-emerald-900 rounded"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <span className="checkbox-text">Ingat sesi saya di perangkat ini</span>
+                <span>Ingat sesi saya di perangkat ini</span>
               </label>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="submit-btn flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg bg-[#2C4A2C] px-4 py-3.5 text-sm font-bold tracking-wide text-white shadow-md transition hover:bg-[#1E3A1E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2C4A2C] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#2C4A2C] px-4 py-2.5 text-sm font-bold tracking-wide text-white shadow-md transition hover:bg-[#1E3A1E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2C4A2C] disabled:cursor-not-allowed disabled:opacity-70"
               disabled={loading}
             >
               <span>{loading ? "Memverifikasi..." : "Login"}</span>
@@ -302,17 +360,9 @@ export default function LoginForm() {
             </button>
           </form>
 
-          {/* Link to Register */}
-          <div className="mt-6 text-center text-xs text-slate-500">
-            Belum punya akun pengelola?{" "}
-            <Link href="/register" className="font-semibold text-emerald-800 hover:underline">
-              Daftar akun baru
-            </Link>
-          </div>
-
           {/* Footer note */}
-          <div className="login-footer mt-8 border-t border-[#D8D0C0] pt-4 text-center">
-            <p className="copyright text-xs text-[#6B6B6B]">
+          <div className="mt-5 border-t border-[#D8D0C0] pt-3 text-center">
+            <p className="text-[11px] text-[#6B6B6B]">
               © {new Date().getFullYear()} Museum Brawijaya Malang. Hak cipta dilindungi.
             </p>
           </div>
