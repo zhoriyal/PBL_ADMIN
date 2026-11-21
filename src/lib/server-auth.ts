@@ -20,12 +20,18 @@ export async function isAuthenticatedAdmin(): Promise<boolean> {
   if (!apiBaseUrl) {
     throw new Error("API_URL atau NEXT_PUBLIC_API_URL belum dikonfigurasi");
   }
-  const response = await fetch(`${apiBaseUrl.replace(/\/+$/, "")}/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiBaseUrl.replace(/\/+$/, "")}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+  } catch (error) {
+    // Jika backend sedang down atau restart, jangan biarkan server Next.js crash
+    return false;
+  }
 
-  if (response.status === 401 || response.status === 403) {
+  if (response.status === 401 || response.status === 403 || response.status === 429) {
     return false;
   }
   if (!response.ok) {

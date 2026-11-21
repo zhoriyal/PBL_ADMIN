@@ -93,78 +93,78 @@ interface LoginResponse {
 
 export const authApi = {
   login: (username: string, password: string) =>
-    request<LoginResponse>('POST', '/auth/login', { username, password }),
+    request<LoginResponse>('POST', '/api/auth/login', { username, password }),
   register: (data: { nama: string; email: string; password: string; role?: string }) => 
-    request('POST', '/auth/register', data),
-  logout: () => request('POST', '/auth/logout'),
-  me: () => request('GET', '/auth/me'),
+    request('POST', '/api/auth/register', data),
+  logout: () => request('POST', '/api/auth/logout'),
+  me: () => request('GET', '/api/auth/me'),
 };
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 export const dashboardApi = {
-  getSummary: () => request('GET', '/dashboard/summary'),
+  getSummary: () => request('GET', '/api/dashboard/summary'),
 };
 
 // ─── TIKET ───────────────────────────────────────────────────────────────────
 export const tiketApi = {
-  getCategories: () => request('GET', '/tiket/categories'),
-  addCategory: (data: any) => request('POST', '/tiket/categories', data),
-  updateCategory: (id: number | string, data: any) => request('PUT', `/tiket/categories/${id}`, data),
-  deleteCategory: (id: number | string) => request('DELETE', `/tiket/categories/${id}`),
+  getCategories: () => request('GET', '/api/tiket/categories'),
+  addCategory: (data: any) => request('POST', '/api/tiket/categories', data),
+  updateCategory: (id: number | string, data: any) => request('PUT', `/api/tiket/categories/${id}`, data),
+  deleteCategory: (id: number | string) => request('DELETE', `/api/tiket/categories/${id}`),
 
   getBookings: (params: Record<string, any> = {}) => {
     const q = new URLSearchParams(params).toString();
-    return request('GET', `/tiket/bookings?${q}`);
+    return request('GET', `/api/tiket/bookings?${q}`);
   },
   updateBookingStatus: (id: string, status: string) => 
-    request('PUT', `/tiket/bookings/${encodeURIComponent(id)}/status`, { status }),
-  checkIn: (id: string) => request('PUT', `/tiket/bookings/${encodeURIComponent(id)}/checkin`),
-  getStats: () => request('GET', '/tiket/stats'),
+    request('PUT', `/api/tiket/bookings/${encodeURIComponent(id)}/status`, { status }),
+  checkIn: (id: string) => request('PUT', `/api/tiket/bookings/${encodeURIComponent(id)}/checkin`),
+  getStats: () => request('GET', '/api/tiket/stats'),
 };
 
 // ─── KOLEKSI ──────────────────────────────────────────────────────────────────
 export const koleksiApi = {
   getAll: (params: Record<string, any> = {}) => {
     const q = new URLSearchParams(params).toString();
-    return request('GET', `/koleksi?${q}`);
+    return request('GET', `/api/koleksi?${q}`);
   },
-  getStats: () => request('GET', '/koleksi/stats'),
-  add: (data: any) => request('POST', '/koleksi', data),
-  update: (id: number | string, data: any) => request('PUT', `/koleksi/${id}`, data),
-  delete: (id: number | string) => request('DELETE', `/koleksi/${id}`),
+  getStats: () => request('GET', '/api/koleksi/stats'),
+  add: (data: any) => request('POST', '/api/koleksi', data),
+  update: (id: number | string, data: any) => request('PUT', `/api/koleksi/${id}`, data),
+  delete: (id: number | string) => request('DELETE', `/api/koleksi/${id}`),
 };
 
 // ─── AI ──────────────────────────────────────────────────────────────────────
 export const aiApi = {
   generateDescription: (data: { title: string; category: string }) =>
-    request<{ description: string }>('POST', '/ai/generate-description', data),
+    request<{ description: string }>('POST', '/api/ai/generate-description', data),
 };
 
 // ─── ULASAN ───────────────────────────────────────────────────────────────────
 export const ulasanApi = {
   getAll: (params: Record<string, any> = {}) => {
     const q = new URLSearchParams(params).toString();
-    return request('GET', `/ulasan?${q}`);
+    return request('GET', `/api/ulasan?${q}`);
   },
-  reply: (id: number | string, reply: string) => request('PUT', `/ulasan/${id}/reply`, { reply }),
-  delete: (id: number | string) => request('DELETE', `/ulasan/${id}`),
+  reply: (id: number | string, reply: string) => request('PUT', `/api/ulasan/${id}/reply`, { reply }),
+  delete: (id: number | string) => request('DELETE', `/api/ulasan/${id}`),
 };
 
 // ─── INFORMASI ────────────────────────────────────────────────────────────────
 export const informasiApi = {
   getPengumuman: (params: Record<string, any> = {}) => {
     const q = new URLSearchParams(params).toString();
-    return request('GET', `/informasi?${q}`);
+    return request('GET', `/api/informasi?${q}`);
   },
-  addPengumuman: (data: any) => request('POST', '/informasi', data),
-  updatePengumuman: (id: number | string, data: any) => request('PUT', `/informasi/${id}`, data),
-  deletePengumuman: (id: number | string) => request('DELETE', `/informasi/${id}`),
+  addPengumuman: (data: any) => request('POST', '/api/informasi', data),
+  updatePengumuman: (id: number | string, data: any) => request('PUT', `/api/informasi/${id}`, data),
+  deletePengumuman: (id: number | string) => request('DELETE', `/api/informasi/${id}`),
 
-  getFaq: () => request('GET', '/informasi/faq'),
-  addFaq: (data: any) => request('POST', '/informasi/faq', data),
-  updateFaq: (id: number | string, data: any) => request('PUT', `/informasi/faq/${id}`, data),
-  deleteFaq: (id: number | string) => request('DELETE', `/informasi/faq/${id}`),
+  getFaq: () => request('GET', '/api/informasi/faq'),
+  addFaq: (data: any) => request('POST', '/api/informasi/faq', data),
+  updateFaq: (id: number | string, data: any) => request('PUT', `/api/informasi/faq/${id}`, data),
+  deleteFaq: (id: number | string) => request('DELETE', `/api/informasi/faq/${id}`),
 
-  getJamOperasional: () => request('GET', '/informasi/jam-operasional'),
-  updateJamOperasional: (data: any) => request('PUT', '/informasi/jam-operasional', data),
+  getJamOperasional: () => request('GET', '/api/informasi/jam-operasional'),
+  updateJamOperasional: (data: any) => request('PUT', '/api/informasi/jam-operasional', data),
 };
