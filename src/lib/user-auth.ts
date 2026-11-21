@@ -38,7 +38,9 @@ export function useUserAuth() {
   useEffect(() => {
     const cached = getStoredUser();
     if (cached) {
-      setUser(cached);
+      queueMicrotask(() => {
+        setUser(cached);
+      });
     }
 
     const token = getAuthToken();
@@ -47,7 +49,9 @@ export function useUserAuth() {
         if (!cached) {
           clearStoredUser();
         }
-        setLoading(false);
+        queueMicrotask(() => {
+          setLoading(false);
+        });
         return;
       }
 
@@ -74,7 +78,9 @@ export function useUserAuth() {
           setLoading(false);
         });
     } else {
-      setLoading(false);
+      queueMicrotask(() => {
+        setLoading(false);
+      });
     }
   }, []);
 

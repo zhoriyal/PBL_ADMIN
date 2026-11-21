@@ -19,18 +19,35 @@ export default function SettingsTabNavigation({
   onChange,
 }: SettingsTabNavigationProps) {
   return (
-    <nav className="flex gap-5 overflow-x-auto border-b border-slate-200" aria-label="Pengaturan">
-      {tabs.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => onChange(id)}
-          className={`flex shrink-0 items-center gap-1.5 border-b-2 px-1 py-3 text-[10px] font-bold uppercase tracking-wide ${activeTab === id ? "border-[#2D3E33] text-[#2D3E33]" : "border-transparent text-slate-400 hover:text-slate-700"}`}
-        >
-          <Icon size={12} fill={id === "profile" || id === "notifications" ? "currentColor" : "none"} />
-          {label}
-        </button>
-      ))}
+    <nav
+      role="tablist"
+      aria-label="Pengaturan"
+      className="flex gap-5 overflow-x-auto border-b border-slate-200"
+    >
+      {tabs.map(({ id, label, icon: Icon }) => {
+        const isActive = activeTab === id;
+
+        return (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onChange(id)}
+            className={`flex shrink-0 items-center gap-1.5 border-b-2 px-1 py-3 text-[10px] font-bold uppercase tracking-wide ${
+              isActive
+                ? "border-[#2D3E33] text-[#2D3E33]"
+                : "border-transparent text-slate-400 hover:text-slate-700"
+            }`}
+          >
+            <Icon
+              size={12}
+              fill={id === "profile" || id === "notifications" ? "currentColor" : "none"}
+            />
+            {label}
+          </button>
+        );
+      })}
     </nav>
   );
 }

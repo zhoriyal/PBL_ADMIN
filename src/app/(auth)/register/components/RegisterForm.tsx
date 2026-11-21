@@ -73,8 +73,9 @@ export default function RegisterForm() {
       } else {
         setGeneralError(res?.message || "Pendaftaran gagal.");
       }
-    } catch (err: any) {
-      setGeneralError(err?.message || "Terjadi kesalahan saat pendaftaran akun.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan saat pendaftaran akun.";
+      setGeneralError(message);
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,7 @@
+export type TicketCategoryStatus = "Aktif" | "Nonaktif";
+
+export type TicketBookingStatus = "LUNAS" | "MENUNGGU" | "BATAL";
+
 export interface TicketCategory {
   id: number;
   badge: string;
@@ -6,7 +10,17 @@ export interface TicketCategory {
   title: string;
   price: number;
   kuota: number;
-  status: "Aktif" | "Nonaktif";
+  status: TicketCategoryStatus;
+}
+
+export interface TicketCategoryFormValues {
+  badge: string;
+  badge_bg: string;
+  badge_color: string;
+  title: string;
+  price: string | number;
+  kuota: string | number;
+  status: TicketCategoryStatus;
 }
 
 export interface TicketBooking {
@@ -22,7 +36,13 @@ export interface TicketBooking {
   sesi: string;
   visit_date: string;
   payment_method: string;
-  status: "LUNAS" | "MENUNGGU" | "BATAL";
+  status: TicketBookingStatus;
   checked_in: number;
   checked_in_at?: string | null;
+}
+
+export interface TicketStats {
+  terjualHariIni: number;
+  sudahCheckIn: number;
+  pendapatanHariIni: number;
 }

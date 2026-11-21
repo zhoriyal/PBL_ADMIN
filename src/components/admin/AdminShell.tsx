@@ -61,12 +61,21 @@ export default function AdminShell({
         />
       )}
 
-      <Sidebar
-        onNavigate={() => setSidebarOpen(false)}
-        onOpenLogout={() => setLogoutModalOpen(true)}
-      />
+      <div
+        id="admin-sidebar"
+        className={`admin-sidebar-shell${sidebarOpen ? " sidebar-open" : ""}`}
+      >
+        <Sidebar
+          onNavigate={() => setSidebarOpen(false)}
+          onOpenLogout={() => setLogoutModalOpen(true)}
+        />
+      </div>
       <div className="admin-main">
-        <Topbar onOpenLogout={() => setLogoutModalOpen(true)} />
+        <Topbar
+          onOpenLogout={() => setLogoutModalOpen(true)}
+          onToggleSidebar={() => setSidebarOpen((open) => !open)}
+          sidebarOpen={sidebarOpen}
+        />
         <main className="admin-content">{children}</main>
       </div>
     </div>

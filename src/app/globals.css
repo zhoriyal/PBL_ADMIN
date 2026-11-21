@@ -1773,19 +1773,29 @@ textarea:focus-visible {
 
 .admin-main {
   flex: 1;
-  width: 100%;
+  margin-left: 216px;
+  width: calc(100% - 216px);
   min-width: 0;
   min-height: 0;
   padding: 24px;
   overflow-y: auto;
-  overflow-x: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
-/* Tombol menu hanya terlihat di layar kecil */
-.mobile-header {
+.mobile-menu-button {
   display: none;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--dark-green);
+  cursor: pointer;
 }
 
 .sidebar-overlay {
@@ -1817,51 +1827,8 @@ textarea:focus-visible {
     visibility: visible;
   }
 
-  .mobile-header {
-    position: relative;
-    z-index: 50;
-    display: flex;
-    flex: 0 0 64px;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    padding: 0 18px;
-    background: #FCFBF8;
-    border-bottom: 1px solid var(--border-light);
-    box-shadow: 0 2px 8px rgba(31, 42, 35, 0.04);
-  }
-
   .mobile-menu-button {
     display: inline-flex;
-    flex: 0 0 42px;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border: 1px solid var(--border-light);
-    border-radius: 10px;
-    background: #fff;
-    color: var(--dark-green);
-    cursor: pointer;
-  }
-
-  .mobile-brand {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    line-height: 1.1;
-  }
-
-  .mobile-brand span {
-    color: var(--text-gray);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-  }
-
-  .mobile-brand strong {
-    color: var(--dark-green);
-    font-size: 15px;
-    letter-spacing: 0.06em;
   }
 
   .sidebar-overlay {
@@ -1879,6 +1846,8 @@ textarea:focus-visible {
   }
 
   .admin-main {
+    margin-left: 0;
+    width: 100%;
     padding: 20px;
   }
 }
@@ -1888,11 +1857,6 @@ textarea:focus-visible {
    ========================================= */
 
 @media (max-width: 600px) {
-  .mobile-header {
-    flex-basis: 58px;
-    padding: 0 12px;
-  }
-
   .mobile-menu-button {
     width: 40px;
     height: 40px;
