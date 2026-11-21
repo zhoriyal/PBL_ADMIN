@@ -11,34 +11,38 @@ interface AuthResponse {
 const ADMIN_ROLES = new Set(["ADMIN", "SUPERADMIN", "STAFF"]);
 
 export async function isAuthenticatedAdmin(): Promise<boolean> {
-  const token = (await cookies()).get(AUTH_TOKEN_COOKIE)?.value.trim();
+  const cookieStore = await cookies();
+  const token = cookieStore.get(AUTH_TOKEN_COOKIE)?.value.trim();
   if (!token) {
     return false;
   }
 
-  const apiBaseUrl = (process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "").trim();
-  if (!apiBaseUrl) {
-    throw new Error("API_URL atau NEXT_PUBLIC_API_URL belum dikonfigurasi");
+  const apiBaseUrl = (process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").trim();
+  let base = apiBaseUrl.replace(/\/+$/, "");
+  if (!base.endsWith("/api")) {
+    base = `${base}/api`;
   }
+
   let response: Response;
   try {
-    response = await fetch(`${apiBaseUrl.replace(/\/+$/, "")}/api/auth/me`, {
+    response = await fetch(`${base}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
-  } catch (error) {
-    // Jika backend sedang down atau restart, jangan biarkan server Next.js crash
+  } catch {
+    // Jika backend sedang down atau restart, redirect ke login tanpa membuat Next.js crash
     return false;
   }
 
-  if (response.status === 401 || response.status === 403 || response.status === 429) {
-    return false;
-  }
   if (!response.ok) {
-    throw new Error(`Gagal memverifikasi sesi admin (HTTP ${response.status})`);
+    return false;
   }
 
-  const auth = await response.json() as AuthResponse;
-  const role = auth.data?.role?.toUpperCase();
-  return auth.success === true && !!role && ADMIN_ROLES.has(role);
+  try {
+    const auth = (await response.json()) as AuthResponse;
+    const role = auth.data?.role?.toUpperCase();
+    return auth.success === true && !!role && ADMIN_ROLES.has(role);
+  } catch {
+    return false;
+  }
 }
