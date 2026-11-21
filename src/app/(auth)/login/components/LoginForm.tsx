@@ -90,7 +90,7 @@ export default function LoginForm() {
       } else {
         window.localStorage.removeItem("museum-admin-email");
       }
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
       return;
     } catch (err: unknown) {
       const ADMIN_EMAIL = "admin@museum.com";
@@ -118,7 +118,7 @@ export default function LoginForm() {
         } else {
           window.localStorage.removeItem("museum-admin-email");
         }
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
         return;
       }
 
