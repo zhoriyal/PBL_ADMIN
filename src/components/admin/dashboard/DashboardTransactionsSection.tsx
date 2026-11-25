@@ -13,10 +13,21 @@ export default function DashboardTransactionsSection({
   onExport,
 }: DashboardTransactionsSectionProps) {
   const [filterStatus, setFilterStatus] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const itemsPerPage = 5;
+
   const filteredTransactions = transactions.filter(
     (transaction) => filterStatus === "ALL" || transaction.status === filterStatus,
   );
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / itemsPerPage));
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedTransactions = filteredTransactions.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage,
+  );
+  const startItem = filteredTransactions.length > 0 ? (safeCurrentPage - 1) * itemsPerPage + 1 : 0;
+  const endItem = filteredTransactions.length > 0 ? Math.min(safeCurrentPage * itemsPerPage, filteredTransactions.length) : 0;
 
   return (
     <>
@@ -27,12 +38,17 @@ export default function DashboardTransactionsSection({
             <select
               aria-label="Filter status transaksi"
               value={filterStatus}
-              onChange={(event) => setFilterStatus(event.target.value)}
+              onChange={(event) => {
+                setFilterStatus(event.target.value);
+                setCurrentPage(1);
+              }}
               style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", border: "1px solid #ccc" }}
             >
               <option value="ALL">Semua Status</option>
               <option value="LUNAS">LUNAS</option>
+              <option value="MENUNGGU">MENUNGGU</option>
               <option value="PENDING">PENDING</option>
+              <option value="BATAL">BATAL</option>
             </select>
           </div>
           <button
@@ -55,38 +71,132 @@ export default function DashboardTransactionsSection({
               </tr>
             </thead>
             <tbody>
-              {filteredTransactions.map((transaction) => (
-                <tr key={transaction.id} style={{ borderBottom: "1px solid #f9fafb" }}>
-                  <td style={{ padding: "12px 18px", fontWeight: "bold", color: "#111" }}>{transaction.id}</td>
-                  <td style={{ padding: "12px 18px", color: "#4b5563" }}>{transaction.name}</td>
-                  <td style={{ padding: "12px 18px", color: "#4b5563" }}>{transaction.tickets} Tiket</td>
-                  <td style={{ padding: "12px 18px", fontWeight: "bold", color: "#111" }}>Rp {transaction.total.toLocaleString("id-ID")}</td>
-                  <td style={{ padding: "12px 18px" }}>
-                    <span
-                      style={{
-                        backgroundColor: transaction.status === "LUNAS" ? "#d1fae5" : "#fef3c7",
-                        color: transaction.status === "LUNAS" ? "#047857" : "#b45309",
-                        padding: "2px 8px",
-                        borderRadius: "10px",
-                        fontSize: "9px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {transaction.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px 18px", textAlign: "right" }}>
-                    <button
-                      onClick={() => setSelectedTransaction(transaction)}
-                      style={{ color: "#2563eb", fontWeight: "600", border: "none", background: "none", cursor: "pointer", fontSize: "11px" }}
-                    >
-                      Detail
-                    </button>
+              {paginatedTransactions.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    style={{
+                      padding: "24px",
+                      textAlign: "center",
+                      color: "#78716C",
+                      fontSize: "11px",
+                    }}
+                  >
+                    Tidak ada data transaksi tiket yang sesuai.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                paginatedTransactions.map((transaction) => (
+                  <tr key={transaction.id} style={{ borderBottom: "1px solid #f9fafb" }}>
+                    <td style={{ padding: "12px 18px", fontWeight: "bold", color: "#111" }}>{transaction.id}</td>
+                    <td style={{ padding: "12px 18px", color: "#4b5563" }}>{transaction.name}</td>
+                    <td style={{ padding: "12px 18px", color: "#4b5563" }}>{transaction.tickets} Tiket</td>
+                    <td style={{ padding: "12px 18px", fontWeight: "bold", color: "#111" }}>Rp {transaction.total.toLocaleString("id-ID")}</td>
+                    <td style={{ padding: "12px 18px" }}>
+                      <span
+                        style={{
+                          backgroundColor:
+                            transaction.status === "LUNAS"
+                              ? "#d1fae5"
+                              : transaction.status === "BATAL"
+                                ? "#fee2e2"
+                                : "#fef3c7",
+                          color:
+                            transaction.status === "LUNAS"
+                              ? "#047857"
+                              : transaction.status === "BATAL"
+                                ? "#dc2626"
+                                : "#b45309",
+                          padding: "2px 8px",
+                          borderRadius: "10px",
+                          fontSize: "9px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {transaction.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 18px", textAlign: "right" }}>
+                      <button
+                        onClick={() => setSelectedTransaction(transaction)}
+                        style={{ color: "#2563eb", fontWeight: "600", border: "none", background: "none", cursor: "pointer", fontSize: "11px" }}
+                      >
+                        Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
+        </div>
+
+        <div
+          style={{
+            padding: "12px 18px",
+            borderTop: "1px solid #f0f0f0",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "10px",
+            fontSize: "11px",
+            color: "#78716C",
+          }}
+        >
+          <span>
+            Menampilkan {startItem} - {endItem} dari {filteredTransactions.length} data
+          </span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+            <button
+              type="button"
+              disabled={safeCurrentPage === 1}
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              style={{
+                padding: "4px 10px",
+                border: "1px solid #E7E5E4",
+                borderRadius: "6px",
+                backgroundColor: "#FFFFFF",
+                cursor: safeCurrentPage === 1 ? "not-allowed" : "pointer",
+                opacity: safeCurrentPage === 1 ? 0.5 : 1,
+              }}
+            >
+              Sebelumnya
+            </button>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+              <button
+                type="button"
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                style={{
+                  padding: "4px 10px",
+                  border: safeCurrentPage === page ? "none" : "1px solid #E7E5E4",
+                  borderRadius: "6px",
+                  backgroundColor: safeCurrentPage === page ? "#224229" : "#FFFFFF",
+                  color: safeCurrentPage === page ? "#FFFFFF" : undefined,
+                  fontWeight: safeCurrentPage === page ? "700" : undefined,
+                  cursor: "pointer",
+                }}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              type="button"
+              disabled={safeCurrentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              style={{
+                padding: "4px 10px",
+                border: "1px solid #E7E5E4",
+                borderRadius: "6px",
+                backgroundColor: "#FFFFFF",
+                cursor: safeCurrentPage === totalPages ? "not-allowed" : "pointer",
+                opacity: safeCurrentPage === totalPages ? 0.5 : 1,
+              }}
+            >
+              Selanjutnya
+            </button>
+          </div>
         </div>
       </section>
 

@@ -1,10 +1,9 @@
-import { Bell, Clock3, LockKeyhole, Users, type LucideIcon } from "lucide-react";
+import { Bell, LockKeyhole, Users, type LucideIcon } from "lucide-react";
 
-export type SettingsTab = "profile" | "hours" | "security" | "notifications";
+export type SettingsTab = "profile" | "security" | "notifications";
 
 const tabs: { id: SettingsTab; label: string; icon: LucideIcon }[] = [
   { id: "profile", label: "Profil & Akun", icon: Users },
-  { id: "hours", label: "Jam Operasional & Tiket", icon: Clock3 },
   { id: "security", label: "Keamanan & Sandi", icon: LockKeyhole },
   { id: "notifications", label: "Notifikasi", icon: Bell },
 ];

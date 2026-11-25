@@ -40,7 +40,7 @@ export default function DashboardPage() {
           setTiketTerjualHariIni(data.terjualHariIni || 0);
           setPendapatanHariIni(data.pendapatanHariIni || 0);
           setKatalogCount(data.totalKoleksi || 0);
-          if (data.transactions?.length) setTransactions(data.transactions);
+          setTransactions(Array.isArray(data.transactions) ? data.transactions : []);
           if (data.reviews?.length) setReviews(data.reviews);
           if (data.weeklyData?.length) setWeeklyData(data.weeklyData);
         }

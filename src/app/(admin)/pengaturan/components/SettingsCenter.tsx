@@ -22,9 +22,6 @@ const DEFAULT_PROFILE = {
   phone: "081234567890",
   capacity: "1000",
   status: "Buka Normal",
-  openingDays: "Selasa - Minggu Senin Libur",
-  openingHours: "08:00 - 15:00 WIB",
-  ticketPrice: "10000",
 };
 
 const isValidEmail = (value: string): boolean =>
@@ -34,13 +31,6 @@ const parsePositiveInt = (value: string): number => {
   const trimmed = (value ?? "").trim();
   if (!trimmed || !isValidDigitsOnly(trimmed)) return Number.NaN;
   return Number(trimmed);
-};
-
-const parseNonNegativeNumber = (value: string): number => {
-  const trimmed = (value ?? "").trim();
-  if (!trimmed || !isValidDigitsOnly(trimmed)) return Number.NaN;
-  const parsed = Number(trimmed);
-  return Number.isFinite(parsed) ? parsed : Number.NaN;
 };
 
 export default function SettingsCenter() {
@@ -68,9 +58,9 @@ export default function SettingsCenter() {
 
   const updateProfile = (key: keyof typeof profile, value: string) => {
     const sanitizedValue =
-      key === "name" || key === "role" || key === "status" || key === "openingDays"
+      key === "name" || key === "role" || key === "status"
         ? sanitizeLettersOnly(value)
-        : key === "phone" || key === "capacity" || key === "ticketPrice"
+        : key === "phone" || key === "capacity"
           ? sanitizeDigitsOnly(value)
           : value;
 
@@ -126,40 +116,6 @@ export default function SettingsCenter() {
       phone: trimmedPhone,
       capacity: String(parsedCapacity),
       status: trimmedStatus,
-    }));
-    triggerSavedBanner();
-  };
-
-  const saveHoursAndTicketSettings = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmedDays = (profile.openingDays || "").trim();
-    const trimmedHours = (profile.openingHours || "").trim();
-    const parsedCapacity = parsePositiveInt(profile.capacity);
-    const parsedPrice = parseNonNegativeNumber(profile.ticketPrice);
-
-    if (!isValidLettersOnly(trimmedDays)) {
-      setFormError("Hari operasional hanya boleh berisi huruf.");
-      return;
-    }
-    if (!trimmedHours) {
-      setFormError("Jam buka - tutup wajib diisi.");
-      return;
-    }
-    if (!Number.isInteger(parsedCapacity) || parsedCapacity < 1) {
-      setFormError("Kapasitas pengunjung per hari hanya boleh berisi angka minimal 1.");
-      return;
-    }
-    if (Number.isNaN(parsedPrice) || parsedPrice < 0) {
-      setFormError("Harga tiket reguler hanya boleh berisi angka 0 atau lebih.");
-      return;
-    }
-
-    setProfile((current) => ({
-      ...current,
-      openingDays: trimmedDays,
-      openingHours: trimmedHours,
-      capacity: String(parsedCapacity),
-      ticketPrice: String(parsedPrice),
     }));
     triggerSavedBanner();
   };
@@ -310,70 +266,6 @@ export default function SettingsCenter() {
               </div>
             </form>
           </div>
-        )}
-
-        {activeTab === "hours" && (
-          <form
-            onSubmit={saveHoursAndTicketSettings}
-            noValidate
-            className={`${panelClass} my-4 max-w-3xl p-4`}
-          >
-            <div className="mb-4 border-b border-slate-100 pb-3">
-              <h2 className="text-sm font-bold uppercase">
-                Jam Operasional & Tiket
-              </h2>
-              <p className="text-xs text-slate-400">
-                Atur jadwal kunjungan dan harga tiket museum
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <label className="text-xs font-semibold">
-                Hari Operasional
-                <input
-                  value={profile.openingDays}
-                  onChange={(event) => updateProfile("openingDays", event.target.value)}
-                  className={fieldClass}
-                />
-              </label>
-              <label className="text-xs font-semibold">
-                Jam Buka - Tutup
-                <input
-                  value={profile.openingHours}
-                  onChange={(event) => updateProfile("openingHours", event.target.value)}
-                  className={fieldClass}
-                />
-              </label>
-              <label className="text-xs font-semibold">
-                Kapasitas Pengunjung / Hari
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={profile.capacity}
-                  onChange={(event) => updateProfile("capacity", event.target.value)}
-                  className={fieldClass}
-                />
-              </label>
-              <label className="text-xs font-semibold">
-                Harga Tiket Reguler
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={profile.ticketPrice}
-                  onChange={(event) => updateProfile("ticketPrice", event.target.value)}
-                  className={fieldClass}
-                />
-              </label>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                type="submit"
-                className="flex items-center gap-1 rounded-lg bg-[#2D3E33] px-3 py-2 text-xs font-semibold text-white"
-              >
-                <Save size={13} />
-                {saved ? "Tersimpan" : "Simpan Perubahan"}
-              </button>
-            </div>
-          </form>
         )}
 
         {activeTab === "security" && (

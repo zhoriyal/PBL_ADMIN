@@ -36,19 +36,44 @@ export function useUserAuth() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const cached = getStoredUser();
-    if (cached) {
-      queueMicrotask(() => {
-        setUser(cached);
-      });
+    let currentUser = getStoredUser();
+    const token = getAuthToken();
+
+    if (!currentUser && token && token !== OFFLINE_MOCK_TOKEN) {
+      try {
+        const parts = token.split(".");
+        if (parts.length === 3) {
+          const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+          const payload = JSON.parse(atob(base64));
+          currentUser = {
+            id: payload.id ?? payload.username ?? "admin",
+            nama: payload.nama || "Administrator",
+            email: payload.email || payload.username || "admin@museum.com",
+            username: payload.username,
+            role: payload.role || "ADMIN",
+          };
+          setStoredUser(currentUser);
+        }
+      } catch {
+        // Abaikan parse error
+      }
     }
 
-    const token = getAuthToken();
+    if (currentUser) {
+      setUser(currentUser);
+    }
+
     if (token) {
-      if (token === OFFLINE_MOCK_TOKEN && process.env.NODE_ENV === "development") {
-        if (!cached) {
-          clearStoredUser();
-        }
+      if (token === OFFLINE_MOCK_TOKEN) {
+        const mockUser: User = currentUser || {
+          id: "admin",
+          nama: "Administrator Museum",
+          email: "admin@museum.com",
+          username: "admin",
+          role: "ADMIN",
+        };
+        setUser(mockUser);
+        setStoredUser(mockUser);
         queueMicrotask(() => {
           setLoading(false);
         });
@@ -69,10 +94,15 @@ export function useUserAuth() {
             setStoredUser(verifiedUser);
           }
         })
-        .catch(() => {
-          // Token expired or invalid
-          clearStoredUser();
-          setUser(null);
+        .catch((err) => {
+          const msg = String(err?.message || "").toLowerCase();
+          // Hanya bersihkan user jika backend secara spesifik menolak token (unauthorized/forbidden)
+          if (msg.includes("401") || msg.includes("403") || msg.includes("tidak valid") || msg.includes("kedaluwarsa") || msg.includes("ditolak")) {
+            clearStoredUser();
+            setUser(null);
+          } else if (currentUser) {
+            setUser(currentUser);
+          }
         })
         .finally(() => {
           setLoading(false);
