@@ -6,10 +6,55 @@ import AnnouncementsSection from "./AnnouncementsSection";
 import FaqSection from "./FaqSection";
 import InformationStatsSection from "./InformationStatsSection";
 import OperatingHoursSection from "./OperatingHoursSection";
+import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import type { Announcement, FaqItem, JamOperasional } from "./types";
 
 const VALID_CATEGORIES = ["Informasi Umum", "Agenda Event", "Pemeliharaan"] as const;
 const VALID_ANNOUNCEMENT_STATUSES: Announcement["status"][] = ["AKTIF", "ARSIP"];
+const LETTERS_ONLY_REGEX = /^[A-Za-z\s]+$/;
+
+const MONTH_MAP: Record<string, string> = {
+  jan: "01", januari: "01",
+  feb: "02", februari: "02",
+  mar: "03", maret: "03",
+  apr: "04", april: "04",
+  mei: "05", may: "05",
+  jun: "06", juni: "06",
+  jul: "07", juli: "07",
+  agu: "08", ags: "08", agustus: "08", aug: "08",
+  sep: "09", september: "09",
+  okt: "10", oktober: "10", oct: "10",
+  nov: "11", november: "11",
+  des: "12", desember: "12", dec: "12",
+};
+
+const MONTH_SHORT_ID = [
+  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+  "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+];
+
+/** Konversi format tanggal (mis. "25 Sep 2026" atau "2026-09-25") ke YYYY-MM-DD untuk input type="date". */
+function toDateInputValue(raw: string): string {
+  const trimmed = (raw || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const match = trimmed.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+  if (match) {
+    const day = match[1].padStart(2, "0");
+    const month = MONTH_MAP[match[2].toLowerCase()];
+    if (month) return `${match[3]}-${month}-${day}`;
+  }
+  return "";
+}
+
+/** Format YYYY-MM-DD menjadi "25 Okt 2026" agar konsisten di tabel & aplikasi. */
+function formatAnnouncementDate(iso: string): string {
+  const match = (iso || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return iso;
+  const monthIdx = Number(match[2]) - 1;
+  const monthName = MONTH_SHORT_ID[monthIdx];
+  if (!monthName) return iso;
+  return `${Number(match[3])} ${monthName} ${match[1]}`;
+}
 
 const inputClass =
   "mt-1.5 h-8 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[11px] text-slate-700 outline-none focus:border-slate-400";
@@ -60,6 +105,9 @@ const validateAnnouncementForm = (input: {
 
   if (!trimmedTitle) {
     return "Judul pengumuman wajib diisi.";
+  }
+  if (!LETTERS_ONLY_REGEX.test(trimmedTitle)) {
+    return "Judul pengumuman hanya boleh menggunakan huruf saja.";
   }
   if (trimmedTitle.length < 3) {
     return "Judul pengumuman minimal 3 karakter.";
@@ -137,6 +185,11 @@ export default function InfoCenter() {
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    kind: "announcement" | "faq";
+    id: number;
+    label: string;
+  } | null>(null);
 
   const fetchData = useCallback(
     () =>
@@ -225,7 +278,7 @@ export default function InfoCenter() {
             title: item.title ?? "",
             description: item.description ?? "",
             category: item.category || "Informasi Umum",
-            date: item.date ?? "",
+            date: toDateInputValue(item.date ?? ""),
             status: item.status || "AKTIF",
           }
         : {
@@ -253,7 +306,7 @@ export default function InfoCenter() {
       ...announcementForm,
       title: announcementForm.title.trim(),
       description: announcementForm.description.trim(),
-      date: announcementForm.date.trim(),
+      date: formatAnnouncementDate(announcementForm.date.trim()),
     };
 
     setSaving(true);
@@ -273,14 +326,13 @@ export default function InfoCenter() {
     }
   };
 
-  const deleteAnnouncement = async (id: number) => {
-    if (!confirm("Hapus pengumuman ini?")) return;
-    try {
-      await informasiApi.deletePengumuman(String(id));
-      await reloadData();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Gagal menghapus pengumuman.");
-    }
+  const deleteAnnouncement = (id: number) => {
+    const target = announcements.find((a) => a.id === id);
+    setDeleteTarget({
+      kind: "announcement",
+      id,
+      label: target?.title || "Pengumuman ini",
+    });
   };
 
   const openFaq = (item?: FaqItem) => {
@@ -326,13 +378,35 @@ export default function InfoCenter() {
     }
   };
 
-  const deleteFaq = async (id: number) => {
-    if (!confirm("Hapus FAQ ini?")) return;
+  const deleteFaq = (id: number) => {
+    const target = faqs.find((f) => f.id === id);
+    setDeleteTarget({
+      kind: "faq",
+      id,
+      label: target?.question || "FAQ ini",
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setSaving(true);
     try {
-      await informasiApi.deleteFaq(String(id));
+      if (deleteTarget.kind === "announcement") {
+        await informasiApi.deletePengumuman(String(deleteTarget.id));
+      } else {
+        await informasiApi.deleteFaq(String(deleteTarget.id));
+      }
       await reloadData();
+      setDeleteTarget(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Gagal menghapus FAQ.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : `Gagal menghapus ${deleteTarget.kind === "announcement" ? "pengumuman" : "FAQ"}.`
+      );
+      setDeleteTarget(null);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -408,8 +482,14 @@ export default function InfoCenter() {
               <input
                 value={announcementForm.title}
                 onChange={(e) => {
-                  setAnnouncementForm({ ...announcementForm, title: e.target.value });
-                  if (announcementError) setAnnouncementError("");
+                  const raw = e.target.value;
+                  const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                  setAnnouncementForm({ ...announcementForm, title: sanitized });
+                  if (raw !== sanitized) {
+                    setAnnouncementError("Judul pengumuman hanya boleh menggunakan huruf saja.");
+                  } else if (announcementError) {
+                    setAnnouncementError("");
+                  }
                 }}
                 className={inputClass}
               />
@@ -442,12 +522,13 @@ export default function InfoCenter() {
               <label className="block font-semibold">
                 Tanggal
                 <input
+                  type="date"
                   value={announcementForm.date}
                   onChange={(e) => {
                     setAnnouncementForm({ ...announcementForm, date: e.target.value });
                     if (announcementError) setAnnouncementError("");
                   }}
-                  placeholder="25 Okt 2026"
+                  onKeyDown={(e) => e.preventDefault()}
                   className={inputClass}
                 />
               </label>
@@ -554,6 +635,15 @@ export default function InfoCenter() {
           </form>
         </Modal>
       )}
+      <DeleteConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        title={deleteTarget?.kind === "announcement" ? "Hapus Pengumuman?" : "Hapus FAQ?"}
+        itemName={deleteTarget?.label}
+        description="Yakin Anda ingin menghapus data ini? Data yang sudah dihapus tidak dapat dikembalikan."
+        loading={saving}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

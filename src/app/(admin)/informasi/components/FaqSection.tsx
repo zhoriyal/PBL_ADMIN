@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import type { FaqItem } from "./types";
 
 interface FaqSectionProps {
@@ -63,22 +63,22 @@ export default function FaqSection({
                   {item.answer || "-"}
                 </p>
               </div>
-              <div className="flex shrink-0 gap-2 pt-0.5 text-[11px]">
+              <div className="flex shrink-0 items-center gap-2 pt-0.5">
                 <button
                   type="button"
                   onClick={() => onEdit(item)}
                   aria-label={`Edit ${item.question || "FAQ"}`}
-                  className="text-amber-700 hover:underline"
+                  className="flex items-center gap-0.5 text-[11px] font-medium text-amber-600 hover:text-amber-800"
                 >
-                  Edit
+                  <Edit className="h-3.5 w-3.5" /> Edit
                 </button>
                 <button
                   type="button"
                   onClick={() => onDelete(item.id)}
                   aria-label={`Hapus ${item.question || "FAQ"}`}
-                  className="text-red-600 hover:underline"
+                  className="flex items-center gap-0.5 text-[11px] font-medium text-red-600 hover:text-red-800"
                 >
-                  Hapus
+                  <Trash2 className="h-3.5 w-3.5" /> Hapus
                 </button>
               </div>
             </article>

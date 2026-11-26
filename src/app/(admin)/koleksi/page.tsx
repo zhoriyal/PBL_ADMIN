@@ -5,6 +5,7 @@ import { Search, Plus, Trash2, X } from "lucide-react";
 import { aiApi, ApiNetworkError, koleksiApi, storageApi } from "@/lib/api";
 import CollectionStatsSection from "./components/CollectionStatsSection";
 import CollectionTableSection from "./components/CollectionTableSection";
+import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import type { KoleksiItem, KoleksiStatus } from "./components/types";
 
 interface Stats {
@@ -29,25 +30,39 @@ const emptyForm = {
   image_url: "",
 };
 
+const LETTERS_ONLY_REGEX = /^[A-Za-z\s]+$/;
+const NUMBERS_ONLY_REGEX = /^[0-9]+$/;
+
 const validateKoleksiInput = (input: {
   nama: string;
+  sub_deskripsi?: string;
   lokasi: string;
   kategori: string;
   status: string;
   tahun?: string;
 }): string => {
   const trimmedNama = (input.nama || "").trim();
+  const trimmedSub = (input.sub_deskripsi || "").trim();
   const trimmedLokasi = (input.lokasi || "").trim();
   const trimmedTahun = (input.tahun || "").trim();
 
   if (!trimmedNama) {
     return "Nama koleksi wajib diisi.";
   }
+  if (!LETTERS_ONLY_REGEX.test(trimmedNama)) {
+    return "Nama koleksi hanya boleh menggunakan huruf saja.";
+  }
   if (trimmedNama.length < 2) {
     return "Nama koleksi minimal 2 karakter.";
   }
+  if (trimmedSub && !LETTERS_ONLY_REGEX.test(trimmedSub)) {
+    return "Keterangan singkat hanya boleh menggunakan huruf saja.";
+  }
   if (!VALID_CATEGORIES.includes(input.kategori as (typeof VALID_CATEGORIES)[number])) {
     return "Kategori koleksi tidak valid.";
+  }
+  if (trimmedTahun && !NUMBERS_ONLY_REGEX.test(trimmedTahun)) {
+    return "Tahun / era hanya boleh menggunakan angka saja.";
   }
   if (trimmedTahun && trimmedTahun.length > 50) {
     return "Tahun / era maksimal 50 karakter.";
@@ -82,6 +97,8 @@ export default function KatalogKoleksiPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<KoleksiItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const itemsPerPage = 5;
 
   // ─── Upload Foto Koleksi ──────────────────────────────────────────────────
@@ -197,6 +214,7 @@ export default function KatalogKoleksiPage() {
 
     const validationMsg = validateKoleksiInput({
       nama: formData.nama,
+      sub_deskripsi: formData.sub_deskripsi,
       lokasi: formData.lokasi,
       kategori: formData.kategori,
       status: formData.status,
@@ -240,6 +258,7 @@ export default function KatalogKoleksiPage() {
 
     const validationMsg = validateKoleksiInput({
       nama: editItem.nama,
+      sub_deskripsi: editItem.sub_deskripsi,
       lokasi: editItem.lokasi,
       kategori: editItem.kategori,
       status: editItem.status,
@@ -304,16 +323,26 @@ export default function KatalogKoleksiPage() {
   };
 
   // ─── Hapus Koleksi ─────────────────────────────────────────────────────────
-  const handleDelete = async (id: number) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus koleksi ini?")) return;
+  const handleDelete = (id: number) => {
+    const target = koleksiList.find((item) => item.id === id) ?? null;
+    if (target) setDeleteTarget(target);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     setSuccessMessage("");
+    setDeleting(true);
     try {
-      await koleksiApi.delete(String(id));
+      await koleksiApi.delete(String(deleteTarget.id));
       await fetchData();
       setCurrentPage(1);
-      setSuccessMessage("Koleksi berhasil dihapus.");
+      setSuccessMessage(`Koleksi "${deleteTarget.nama}" berhasil dihapus.`);
+      setDeleteTarget(null);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Gagal menghapus koleksi.");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -341,8 +370,8 @@ export default function KatalogKoleksiPage() {
       <CollectionStatsSection loading={loading} stats={stats} />
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col justify-between gap-3 border-b border-slate-200 p-4 md:flex-row md:items-center">
+      <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="mb-3 flex flex-col justify-between gap-4 border-b border-slate-200 px-5 py-5 md:flex-row md:items-center md:px-6">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-wide text-slate-800">
               Daftar Artefak & Benda Sejarah
@@ -492,8 +521,14 @@ export default function KatalogKoleksiPage() {
                 <input
                   value={formData.nama}
                   onChange={(e) => {
-                    setFormData({ ...formData, nama: e.target.value });
-                    if (addError) setAddError("");
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                    setFormData({ ...formData, nama: sanitized });
+                    if (raw !== sanitized) {
+                      setAddError("Nama koleksi hanya boleh menggunakan huruf saja.");
+                    } else if (addError) {
+                      setAddError("");
+                    }
                   }}
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal"
                 />
@@ -502,7 +537,16 @@ export default function KatalogKoleksiPage() {
                 Keterangan Singkat
                 <input
                   value={formData.sub_deskripsi}
-                  onChange={(e) => setFormData({ ...formData, sub_deskripsi: e.target.value })}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                    setFormData({ ...formData, sub_deskripsi: sanitized });
+                    if (raw !== sanitized) {
+                      setAddError("Keterangan singkat hanya boleh menggunakan huruf saja.");
+                    } else if (addError) {
+                      setAddError("");
+                    }
+                  }}
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal"
                 />
               </label>
@@ -545,10 +589,17 @@ export default function KatalogKoleksiPage() {
                 <label className="block font-semibold text-slate-700">
                   Tahun / Era
                   <input
+                    inputMode="numeric"
                     value={formData.tahun}
                     onChange={(e) => {
-                      setFormData({ ...formData, tahun: e.target.value });
-                      if (addError) setAddError("");
+                      const raw = e.target.value;
+                      const sanitized = raw.replace(/[^0-9]/g, "");
+                      setFormData({ ...formData, tahun: sanitized });
+                      if (raw !== sanitized) {
+                        setAddError("Tahun / era hanya boleh menggunakan angka saja.");
+                      } else if (addError) {
+                        setAddError("");
+                      }
                     }}
                     className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal"
                   />
@@ -685,8 +736,14 @@ export default function KatalogKoleksiPage() {
                 <input
                   value={editItem.nama}
                   onChange={(e) => {
-                    setEditItem({ ...editItem, nama: e.target.value });
-                    if (editError) setEditError("");
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                    setEditItem({ ...editItem, nama: sanitized });
+                    if (raw !== sanitized) {
+                      setEditError("Nama koleksi hanya boleh menggunakan huruf saja.");
+                    } else if (editError) {
+                      setEditError("");
+                    }
                   }}
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal"
                 />
@@ -695,7 +752,16 @@ export default function KatalogKoleksiPage() {
                 Keterangan Singkat
                 <input
                   value={editItem.sub_deskripsi}
-                  onChange={(e) => setEditItem({ ...editItem, sub_deskripsi: e.target.value })}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                    setEditItem({ ...editItem, sub_deskripsi: sanitized });
+                    if (raw !== sanitized) {
+                      setEditError("Keterangan singkat hanya boleh menggunakan huruf saja.");
+                    } else if (editError) {
+                      setEditError("");
+                    }
+                  }}
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal"
                 />
               </label>
@@ -738,10 +804,17 @@ export default function KatalogKoleksiPage() {
                 <label className="block font-semibold text-slate-700">
                   Tahun / Era
                   <input
+                    inputMode="numeric"
                     value={editItem.tahun}
                     onChange={(e) => {
-                      setEditItem({ ...editItem, tahun: e.target.value });
-                      if (editError) setEditError("");
+                      const raw = e.target.value;
+                      const sanitized = raw.replace(/[^0-9]/g, "");
+                      setEditItem({ ...editItem, tahun: sanitized });
+                      if (raw !== sanitized) {
+                        setEditError("Tahun / era hanya boleh menggunakan angka saja.");
+                      } else if (editError) {
+                        setEditError("");
+                      }
                     }}
                     className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 font-normal"
                   />
@@ -837,6 +910,15 @@ export default function KatalogKoleksiPage() {
           </div>
         </div>
       )}
+      <DeleteConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        title="Hapus Koleksi?"
+        itemName={deleteTarget?.nama}
+        description="Yakin Anda ingin menghapus data koleksi ini? Data yang sudah dihapus tidak dapat dikembalikan."
+        loading={deleting}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import type { Announcement } from "./types";
 
 interface AnnouncementsSectionProps {
@@ -109,22 +109,24 @@ export default function AnnouncementsSection({
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-right">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(item)}
-                        aria-label={`Edit ${item.title || "pengumuman"}`}
-                        className="mr-2 text-amber-700 hover:underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDelete(item.id)}
-                        aria-label={`Hapus ${item.title || "pengumuman"}`}
-                        className="text-red-600 hover:underline"
-                      >
-                        Hapus
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onEdit(item)}
+                          aria-label={`Edit ${item.title || "pengumuman"}`}
+                          className="flex items-center gap-0.5 text-[11px] font-medium text-amber-600 hover:text-amber-800"
+                        >
+                          <Edit className="h-3.5 w-3.5" /> Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(item.id)}
+                          aria-label={`Hapus ${item.title || "pengumuman"}`}
+                          className="flex items-center gap-0.5 text-[11px] font-medium text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" /> Hapus
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

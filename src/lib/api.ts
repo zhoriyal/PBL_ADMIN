@@ -238,6 +238,25 @@ export const dashboardApi = {
   getSummary: () => request<GenericApiResponse<DashboardSummaryData>>('GET', '/dashboard/summary'),
 };
 
+// ─── NOTIFIKASI ──────────────────────────────────────────────────────────────
+export interface NotifikasiItem {
+  id: number;
+  type: 'BOOKING' | 'ULASAN' | string;
+  title: string;
+  message: string;
+  link?: string | null;
+  reference_id?: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export const notifikasiApi = {
+  getAll: (limit = 30) =>
+    request<GenericApiResponse<NotifikasiItem[]> & { unread?: number }>('GET', `/notifikasi?limit=${limit}`),
+  markRead: (id: number | string) => request<GenericApiResponse>('PUT', `/notifikasi/${id}/read`),
+  markAllRead: () => request<GenericApiResponse>('PUT', '/notifikasi/read-all'),
+};
+
 // ─── TIKET ───────────────────────────────────────────────────────────────────
 export type TicketCategoryStatus = "Aktif" | "Nonaktif";
 export type TicketBookingStatus = "LUNAS" | "MENUNGGU" | "BATAL";

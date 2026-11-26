@@ -1,3 +1,4 @@
+import { Edit, Trash2 } from "lucide-react";
 import type { TicketCategory } from "./types";
 
 interface TicketCategoriesSectionProps {
@@ -5,6 +6,7 @@ interface TicketCategoriesSectionProps {
   categories: TicketCategory[];
   onAdd: () => void;
   onEdit: (category: TicketCategory) => void;
+  onDelete: (category: TicketCategory) => void;
 }
 
 const CATEGORY_LABEL_MAP: Record<string, string> = {
@@ -23,6 +25,7 @@ export default function TicketCategoriesSection({
   categories,
   onAdd,
   onEdit,
+  onDelete,
 }: TicketCategoriesSectionProps) {
   const safeCategories = Array.isArray(categories) ? categories : [];
 
@@ -140,21 +143,22 @@ export default function TicketCategoriesSection({
                   >
                     {category.badge || "KATEGORI"}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => onEdit(category)}
-                    style={{
-                      fontFamily: "sans-serif",
-                      background: "none",
-                      border: "none",
-                      color: "#78716C",
-                      fontSize: "11px",
-                      cursor: "pointer",
-                      fontWeight: "600",
-                    }}
-                  >
-                    ✏️ Edit
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(category)}
+                      className="flex items-center gap-0.5 text-[11px] font-medium text-amber-600 hover:text-amber-800"
+                    >
+                      <Edit className="h-3.5 w-3.5" /> Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(category)}
+                      className="flex items-center gap-0.5 text-[11px] font-medium text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Hapus
+                    </button>
+                  </div>
                 </div>
 
                 <h3

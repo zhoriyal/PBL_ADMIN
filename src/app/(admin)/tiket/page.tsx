@@ -6,6 +6,7 @@ import { tiketApi } from "@/lib/api";
 import TicketStatsSection from "./components/TicketStatsSection";
 import TicketCategoriesSection from "./components/TicketCategoriesSection";
 import TicketBookingsSection from "./components/TicketBookingsSection";
+import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import type { TicketBooking, TicketCategory } from "./components/types";
 
 const CATEGORY_RENAME_MAP: Record<string, string> = {
@@ -18,6 +19,8 @@ const normalizeCategoryTitle = (title?: string): string => {
   if (!trimmed) return "";
   return CATEGORY_RENAME_MAP[trimmed] ?? trimmed;
 };
+
+const LETTERS_ONLY_REGEX = /^[A-Za-z\s]+$/;
 
 const validateCategoryPayload = (input: {
   badge: string;
@@ -32,8 +35,14 @@ const validateCategoryPayload = (input: {
   if (input.requireBadge && !trimmedBadge) {
     return "Label badge kategori wajib diisi.";
   }
+  if (input.requireBadge && trimmedBadge && !LETTERS_ONLY_REGEX.test(trimmedBadge)) {
+    return "Label badge kategori hanya boleh menggunakan huruf saja.";
+  }
   if (!trimmedTitle) {
     return "Nama kategori tiket wajib diisi.";
+  }
+  if (!LETTERS_ONLY_REGEX.test(trimmedTitle)) {
+    return "Nama kategori tiket hanya boleh menggunakan huruf saja.";
   }
   if (trimmedTitle.length < 2) {
     return "Nama kategori tiket minimal 2 karakter.";
@@ -64,6 +73,7 @@ export default function ManajemenTiketPage() {
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [addFormError, setAddFormError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<TicketCategory | null>(null);
   const [checkInSaving, setCheckInSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const bookingsPerPage = 5;
@@ -245,6 +255,31 @@ export default function ManajemenTiketPage() {
     }
   };
 
+  // Hapus kategori
+  const handleDeleteCategory = (category: TicketCategory) => {
+    setDeleteTarget(category);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!deleteTarget) return;
+    const label = deleteTarget.title || deleteTarget.badge || "kategori ini";
+
+    setError("");
+    setSuccessMessage("");
+    setSaving(true);
+    try {
+      await tiketApi.deleteCategory(String(deleteTarget.id));
+      await fetchData();
+      setSuccessMessage(`Kategori tiket "${label}" berhasil dihapus.`);
+      setDeleteTarget(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Gagal menghapus kategori tiket.");
+      setDeleteTarget(null);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Check-in
   const handleConfirmCheckIn = async (booking: TicketBooking) => {
     if (booking.status !== "LUNAS" || booking.checked_in || checkInSaving) return;
@@ -325,6 +360,7 @@ export default function ManajemenTiketPage() {
           setEditFormError("");
           setEditCategory({ ...category, title: normalizeCategoryTitle(category.title) });
         }}
+        onDelete={handleDeleteCategory}
       />
 
       <TicketBookingsSection
@@ -612,8 +648,14 @@ export default function ManajemenTiketPage() {
                 <input
                   value={newCat.badge}
                   onChange={(e) => {
-                    setNewCat({ ...newCat, badge: e.target.value });
-                    if (addFormError) setAddFormError("");
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                    setNewCat({ ...newCat, badge: sanitized });
+                    if (raw !== sanitized) {
+                      setAddFormError("Label badge kategori hanya boleh menggunakan huruf saja.");
+                    } else if (addFormError) {
+                      setAddFormError("");
+                    }
                   }}
                   style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
                 />
@@ -625,8 +667,14 @@ export default function ManajemenTiketPage() {
                 <input
                   value={newCat.title}
                   onChange={(e) => {
-                    setNewCat({ ...newCat, title: e.target.value });
-                    if (addFormError) setAddFormError("");
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                    setNewCat({ ...newCat, title: sanitized });
+                    if (raw !== sanitized) {
+                      setAddFormError("Nama kategori tiket hanya boleh menggunakan huruf saja.");
+                    } else if (addFormError) {
+                      setAddFormError("");
+                    }
                   }}
                   style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
                 />
@@ -638,7 +686,7 @@ export default function ManajemenTiketPage() {
                 <input
                   type="number"
                   min={0}
-                  value={newCat.price}
+                  value={Number.isFinite(newCat.price) ? newCat.price : ""}
                   onChange={(e) => {
                     setNewCat({ ...newCat, price: e.target.value === "" ? NaN : Number(e.target.value) });
                     if (addFormError) setAddFormError("");
@@ -653,7 +701,7 @@ export default function ManajemenTiketPage() {
                 <input
                   type="number"
                   min={1}
-                  value={newCat.kuota}
+                  value={Number.isFinite(newCat.kuota) ? newCat.kuota : ""}
                   onChange={(e) => {
                     setNewCat({ ...newCat, kuota: e.target.value === "" ? NaN : Number(e.target.value) });
                     if (addFormError) setAddFormError("");
@@ -763,8 +811,14 @@ export default function ManajemenTiketPage() {
                 <input
                   value={editCategory.title}
                   onChange={(e) => {
-                    setEditCategory({ ...editCategory, title: e.target.value });
-                    if (editFormError) setEditFormError("");
+                    const raw = e.target.value;
+                    const sanitized = raw.replace(/[^A-Za-z\s]/g, "");
+                    setEditCategory({ ...editCategory, title: sanitized });
+                    if (raw !== sanitized) {
+                      setEditFormError("Nama kategori tiket hanya boleh menggunakan huruf saja.");
+                    } else if (editFormError) {
+                      setEditFormError("");
+                    }
                   }}
                   style={{ width: "100%", padding: "6px", borderRadius: "4px", border: "1px solid #CCC", boxSizing: "border-box" }}
                 />
@@ -776,7 +830,7 @@ export default function ManajemenTiketPage() {
                 <input
                   type="number"
                   min={0}
-                  value={editCategory.price}
+                  value={Number.isFinite(editCategory.price) ? editCategory.price : ""}
                   onChange={(e) => {
                     setEditCategory({
                       ...editCategory,
@@ -794,7 +848,7 @@ export default function ManajemenTiketPage() {
                 <input
                   type="number"
                   min={1}
-                  value={editCategory.kuota}
+                  value={Number.isFinite(editCategory.kuota) ? editCategory.kuota : ""}
                   onChange={(e) => {
                     setEditCategory({
                       ...editCategory,
@@ -849,6 +903,15 @@ export default function ManajemenTiketPage() {
           </form>
         </div>
       )}
+      <DeleteConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        title="Hapus Kategori Tiket?"
+        itemName={deleteTarget?.title || deleteTarget?.badge}
+        description="Yakin Anda ingin menghapus kategori tiket ini? Kategori juga akan terhapus dari aplikasi pengunjung."
+        loading={saving}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDeleteCategory}
+      />
     </div>
   );
 }
